@@ -1,0 +1,50 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+PBL2_web/node_modules
+PBL2_web/.pnp
+PBL2_web/.pnp.*
+PBL2_web/.yarn/*
+PBL2_web/.yarn/patches
+PBL2_web/.yarn/plugins
+PBL2_web/.yarn/releases
+PBL2_web/.yarn/versions
+
+# testing
+PBL2_web/coverage
+
+# next.js
+PBL2_web/.next/
+PBL2_web/out/
+
+# production
+PBL2_web/build
+
+# misc
+PBL2_web/.DS_Store
+PBL2_web/*.pem
+
+# debug
+PBL2_web/npm-debug.log*
+PBL2_web/yarn-debug.log*
+PBL2_web/yarn-error.log*
+PBL2_web/.pnpm-debug.log*
+
+# env files (can opt-in for committing if needed)
+PBL2_web/.env*
+
+# vercel
+PBL2_web/.vercel
+
+# typescript
+PBL2_web/*.tsbuildinfo
+PBL2_web/next-env.d.ts
+
+PBL2_web/src/generated/prisma
+
+PBL2_esp32/.pio
+PBL2_esp32/.vscode/.browse.c_cpp.db*
+PBL2_esp32/.vscode/c_cpp_properties.json
+PBL2_esp32/.vscode/launch.json
+PBL2_esp32/.vscode/ipch
+PBL2_esp32/include/secrets.h
