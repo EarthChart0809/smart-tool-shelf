@@ -1,12 +1,18 @@
 import { Tool } from "@/app/types/tool";
 
 interface Props {
-  tool: Tool;
+  tool: Tool & { quantity: number };
   onIncrease: () => void;
   onDecrease: () => void;
+  disabled?: boolean;
 }
 
-export default function ToolCard({ tool, onIncrease, onDecrease }: Props) {
+export default function ToolCard({
+  tool,
+  onIncrease,
+  onDecrease,
+  disabled = false,
+}: Props) {
   return (
     <div className="rounded-lg border bg-white p-5 shadow">
       <div className="flex justify-between">
@@ -17,7 +23,11 @@ export default function ToolCard({ tool, onIncrease, onDecrease }: Props) {
         </div>
 
         <div className="flex items-center gap-3">
-          <button onClick={onDecrease} className="h-8 w-8 rounded bg-gray-300">
+          <button
+            onClick={onDecrease}
+            disabled={disabled}
+            className="h-8 w-8 rounded bg-gray-300 disabled:cursor-not-allowed disabled:opacity-40"
+          >
             -
           </button>
 
@@ -25,7 +35,8 @@ export default function ToolCard({ tool, onIncrease, onDecrease }: Props) {
 
           <button
             onClick={onIncrease}
-            className="h-8 w-8 rounded bg-green-600 text-white"
+            disabled={disabled}
+            className="h-8 w-8 rounded bg-green-600 text-white disabled:cursor-not-allowed disabled:opacity-40"
           >
             +
           </button>

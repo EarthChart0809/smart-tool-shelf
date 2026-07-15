@@ -9,5 +9,49 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
+}
+
+model User {
+  id          Int      @id @default(autoincrement())
+  employeeId  String   @unique
+  name        String
+
+  role        String   @default("USER")
+
+  createdAt   DateTime @default(now())
+
+  rentals     Rental[]
+}
+
+model Tool {
+  id       Int @id @default(autoincrement())
+
+  name     String
+
+  stock    Int
+
+  boxId    Int
+
+  rentals  Rental[]
+}
+
+model Rental {
+
+  id Int @id @default(autoincrement())
+
+  userId Int
+
+  toolId Int
+
+  quantity Int
+
+  borrowedAt DateTime @default(now())
+
+  returnedAt DateTime?
+
+  user User @relation(fields:[userId],references:[id])
+
+  tool Tool @relation(fields:[toolId],references:[id])
+
 }

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import Header from "@/app/_components/Header";
+import { AuthProvider } from "@/app/providers/AuthProvider";
 
 export const metadata: Metadata = {
   title: "NextBlogApp",
@@ -16,8 +17,10 @@ const RootLayout: React.FC<Props> = (props) => {
   return (
     <html lang="ja">
       <body>
-        <Header />
-        <div>{children}</div>
+        <AuthProvider>
+          <Header />
+          <div>{children}</div>
+        </AuthProvider>
       </body>
     </html>
   );
