@@ -16,7 +16,8 @@ export default function Header() {
 
           <nav className="flex gap-4 text-sm">
             <Link href="/history">貸出履歴</Link>
-            <Link href="/admin/users">社員管理</Link>
+            {/* <Link href="/admin/users">社員管理</Link> */}
+            <Link href="/admin/login">管理者画面</Link>
           </nav>
         </div>
 

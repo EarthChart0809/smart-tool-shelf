@@ -9,14 +9,16 @@ interface RentalWithRelations {
   borrowedAt: string;
   returnedAt: string | null;
   user: { name: string; employeeId: string };
-  tool: { name: string };
+  tool: { name: string; boxId: number };
 }
 
 export default function HistoryPage() {
   const [rentals, setRentals] = useState<RentalWithRelations[]>([]);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     load();
+    checkAdmin();
   }, []);
 
   const load = async () => {
@@ -25,12 +27,17 @@ export default function HistoryPage() {
     setRentals(data);
   };
 
-  const handleReturn = async (rentalId: number) => {
+  const checkAdmin = async () => {
+    const response = await fetch("/api/admin/me");
+    const data = await response.json();
+    setIsAdmin(data.isAdmin);
+  };
+
+  const handleAdminReturn = async (rentalId: number, boxId: number) => {
+    // userIdを付けずに送る = 管理者による代理返却(サーバー側でSupabaseログインを検証)
     const response = await fetch("/api/rentals", {
       method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ rentalId }),
     });
 
@@ -41,15 +48,29 @@ export default function HistoryPage() {
       return;
     }
 
+    // 返却記録が完了したら、物理的にボックスを開けて工具を戻せるようにする
+    await fetch("/api/unlock", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify([{ id: boxId, quantity: 1 }]),
+    });
+
+    alert(
+      "扉が開きました。工具を戻して閉じてください(8秒後に自動施錠されます)",
+    );
+
     await load();
   };
 
   return (
     <main className="min-h-screen bg-gray-100">
-      <Header />
 
       <div className="mx-auto max-w-4xl p-6">
-        <h1 className="mb-6 text-3xl font-bold">貸出履歴</h1>
+        <h1 className="mb-2 text-3xl font-bold">貸出履歴</h1>
+        <p className="mb-6 text-sm text-gray-500">
+          返却操作は、社員本人がQRコードでログインした画面から行ってください。
+          {isAdmin && "(管理者としてログイン中のため、代理返却も可能です)"}
+        </p>
 
         <div className="overflow-hidden rounded-lg border bg-white shadow">
           <table className="w-full text-left">
@@ -60,7 +81,7 @@ export default function HistoryPage() {
                 <th className="p-3">数量</th>
                 <th className="p-3">貸出日時</th>
                 <th className="p-3">状態</th>
-                <th className="p-3"></th>
+                {isAdmin && <th className="p-3"></th>}
               </tr>
             </thead>
 
@@ -76,16 +97,18 @@ export default function HistoryPage() {
                   <td className="p-3">
                     {rental.returnedAt ? "返却済み" : "貸出中"}
                   </td>
-                  <td className="p-3">
-                    {!rental.returnedAt && (
-                      <button
-                        onClick={() => handleReturn(rental.id)}
-                        className="rounded bg-blue-600 px-3 py-1 text-white"
-                      >
-                        返却する
-                      </button>
-                    )}
-                  </td>
+                  {isAdmin && (
+                    <td className="p-3">
+                      {!rental.returnedAt && (
+                        <button
+                          onClick={() => handleAdminReturn(rental.id, rental.tool.boxId)}
+                          className="rounded bg-orange-600 px-3 py-1 text-white"
+                        >
+                          代理返却
+                        </button>
+                      )}
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>

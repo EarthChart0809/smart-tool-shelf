@@ -1,0 +1,16 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../../src/generated/prisma-auth"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model UserProfile {
+  id        String   @id
+  email     String
+  name      String   @default("管理者")
+  role      String   @default("ADMIN")
+  createdAt DateTime @default(now())
+}
