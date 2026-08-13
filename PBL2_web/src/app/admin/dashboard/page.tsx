@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import HourlyChart from "@/app/admin/_components/HourlyChart";
+import AiAnalysisPanel from "@/app/admin/_components/AiAnalysisPanel";
 
 interface RentalSummary {
   id: number;
@@ -175,6 +176,8 @@ export default function AdminDashboardPage() {
           <p className="text-sm text-gray-500">読み込み中...</p>
         )}
       </section>
+
+      <AiAnalysisPanel />
 
       <div className="grid gap-6 md:grid-cols-2">
         <section>
