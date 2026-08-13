@@ -2,11 +2,12 @@ import "dotenv/config";
 import { defineConfig, env } from "prisma/config";
 
 export default defineConfig({
-  schema: "prisma/schema.prisma", // ← sqlite側のschema
+  schema: "prisma/schema.prisma",
   migrations: {
-    path: "prisma/migrations", // ← sqlite側のmigrations
+    path: "prisma/migrations",
   },
   datasource: {
-    url: env("SQLITE_URL"),
+    // マイグレーション実行時はプーリングを経由しない直接接続を使う
+    url: env("DIRECT_URL"),
   },
 });
