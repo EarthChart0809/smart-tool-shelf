@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build --turbopack",
+    "build": "prisma generate --config=prisma.config.ts && next build --turbopack",
     "start": "next start",
     "lint": "eslint",
     "prisma:generate:auth": "prisma generate --config=prisma/auth/prisma.config.ts",
