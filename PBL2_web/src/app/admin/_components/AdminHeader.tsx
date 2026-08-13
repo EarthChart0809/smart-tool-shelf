@@ -12,6 +12,7 @@ export default async function AdminHeader() {
           <p className="font-bold">管理画面</p>
 
           <nav className="flex gap-4 text-sm">
+            <Link href="/admin/dashboard">ダッシュボード</Link>
             <Link href="/admin/users">社員管理</Link>
             <Link href="/admin/tools">工具管理</Link>
           </nav>

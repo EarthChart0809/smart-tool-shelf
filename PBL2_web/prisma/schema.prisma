@@ -33,6 +33,10 @@ model Tool {
 
   boxId    Int
 
+  lifeLimit Int      @default(200)
+  
+  useCount  Int      @default(0)
+
   rentals  Rental[]
 }
 

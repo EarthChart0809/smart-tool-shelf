@@ -1,12 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import LifeGauge from "@/app/admin/_components/LifeGauge";
 
 interface Tool {
   id: number;
   name: string;
   stock: number;
   boxId: number;
+  lifeLimit: number;
+  useCount: number;
 }
 
 export default function AdminToolsPage() {
@@ -14,6 +17,7 @@ export default function AdminToolsPage() {
   const [name, setName] = useState("");
   const [stock, setStock] = useState("");
   const [boxId, setBoxId] = useState("");
+  const [lifeLimit, setLifeLimit] = useState("200");
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -38,7 +42,7 @@ export default function AdminToolsPage() {
     const response = await fetch("/api/admin/tools", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, stock, boxId }),
+      body: JSON.stringify({ name, stock, boxId, lifeLimit }),
     });
 
     const data = await response.json();
@@ -51,6 +55,7 @@ export default function AdminToolsPage() {
     setName("");
     setStock("");
     setBoxId("");
+    setLifeLimit("200");
     await load();
   };
 
@@ -81,11 +86,34 @@ export default function AdminToolsPage() {
     await load();
   };
 
+  const handleLifeLimitChange = async (id: number, lifeLimit: number) => {
+    await fetch(`/api/admin/tools/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ lifeLimit }),
+    });
+
+    await load();
+  };
+
+  const handleReplace = async (id: number, name: string) => {
+    if (!confirm(`${name} を交換済みとして使用回数をリセットしますか？`))
+      return;
+
+    await fetch(`/api/admin/tools/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ replace: true }),
+    });
+
+    await load();
+  };
+
   return (
-    <main className="mx-auto max-w-3xl p-6">
+    <main className="mx-auto max-w-4xl p-6">
       <h1 className="mb-6 text-3xl font-bold">工具管理</h1>
 
-      <div className="mb-8 flex gap-3 rounded-lg border bg-white p-5 shadow">
+      <div className="mb-8 flex flex-wrap gap-3 rounded-lg border bg-white p-5 shadow">
         <input
           className="flex-1 rounded border p-2"
           placeholder="工具名"
@@ -106,6 +134,13 @@ export default function AdminToolsPage() {
           value={boxId}
           onChange={(e) => setBoxId(e.target.value)}
         />
+        <input
+          className="w-32 rounded border p-2"
+          placeholder="交換推奨回数"
+          type="number"
+          value={lifeLimit}
+          onChange={(e) => setLifeLimit(e.target.value)}
+        />
         <button
           onClick={handleAdd}
           className="rounded bg-blue-700 px-4 text-white"
@@ -120,27 +155,46 @@ export default function AdminToolsPage() {
         {tools.map((tool) => (
           <div
             key={tool.id}
-            className="flex items-center justify-between rounded-lg border bg-white p-4 shadow"
+            className="flex flex-wrap items-center justify-between gap-4 rounded-lg border bg-white p-4 shadow"
           >
             <div>
               <p className="font-bold">{tool.name}</p>
               <p className="text-sm text-gray-500">ボックスID: {tool.boxId}</p>
             </div>
 
+            <LifeGauge useCount={tool.useCount} lifeLimit={tool.lifeLimit} />
+
             <div className="flex items-center gap-3">
               <label className="text-sm text-gray-500">在庫:</label>
               <input
                 type="number"
                 defaultValue={tool.stock}
-                className="w-20 rounded border p-1 text-center"
+                className="w-16 rounded border p-1 text-center"
                 onBlur={(e) =>
                   handleStockChange(tool.id, Number(e.target.value))
                 }
               />
 
+              <label className="text-sm text-gray-500">交換推奨:</label>
+              <input
+                type="number"
+                defaultValue={tool.lifeLimit}
+                className="w-16 rounded border p-1 text-center"
+                onBlur={(e) =>
+                  handleLifeLimitChange(tool.id, Number(e.target.value))
+                }
+              />
+
+              <button
+                onClick={() => handleReplace(tool.id, tool.name)}
+                className="rounded bg-green-600 px-3 py-1 text-sm text-white"
+              >
+                交換した
+              </button>
+
               <button
                 onClick={() => handleDelete(tool.id)}
-                className="rounded bg-red-600 px-3 py-1 text-white"
+                className="rounded bg-red-600 px-3 py-1 text-sm text-white"
               >
                 削除
               </button>
