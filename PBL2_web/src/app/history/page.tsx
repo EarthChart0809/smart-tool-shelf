@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Header from "@/app/_components/Header";
+import { unlockBoxesViaLan } from "@/lib/esp32-client";
 
 interface RentalWithRelations {
   id: number;
@@ -48,12 +49,13 @@ export default function HistoryPage() {
       return;
     }
 
-    // 返却記録が完了したら、物理的にボックスを開けて工具を戻せるようにする
-    await fetch("/api/unlock", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify([{ id: boxId, quantity: 1 }]),
-    });
+    // 返却記録が完了したら、同一LAN内の端末からESP32へ直接解錠リクエスト
+    const unlockResult = await unlockBoxesViaLan([{ id: boxId, quantity: 1 }]);
+
+    if (!unlockResult.success) {
+      alert(unlockResult.message ?? "解錠に失敗しました。");
+      return;
+    }
 
     alert(
       "扉が開きました。工具を戻して閉じてください(8秒後に自動施錠されます)",

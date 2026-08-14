@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import ToolCard from "@/app/_components/ToolCard";
 import { Tool } from "@/app/types/tool";
 import { useAuth } from "@/app/providers/AuthProvider";
+import { unlockBoxesViaLan } from "@/lib/esp32-client";
 
 interface MyRental {
   id: number;
@@ -120,26 +121,15 @@ export default function Home() {
   };
 
   const unlockBoxes = async (boxes: { id: number; quantity: number }[]) => {
-    try {
-      const unlockResponse = await fetch("/api/unlock", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(boxes),
-      });
+    const result = await unlockBoxesViaLan(boxes);
 
-      const unlockData = await unlockResponse.json();
-
-      if (unlockData.success) {
-        setUnlockMessage(
-          "扉が開いています。工具を取り出し/戻して閉じてください(自動施錠されます)",
-        );
-        setTimeout(() => setUnlockMessage(""), 8000);
-      } else {
-        alert("解錠に失敗しました。ボックスの状態を確認してください。");
-      }
-    } catch (error) {
-      console.error(error);
-      alert("ESP32との通信に失敗しました。");
+    if (result.success) {
+      setUnlockMessage(
+        "扉が開いています。工具を取り出し/戻して閉じてください(自動施錠されます)",
+      );
+      setTimeout(() => setUnlockMessage(""), 8000);
+    } else {
+      alert(result.message ?? "解錠に失敗しました。");
     }
   };
 
