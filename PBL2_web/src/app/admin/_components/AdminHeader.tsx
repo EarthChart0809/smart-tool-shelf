@@ -15,6 +15,7 @@ export default async function AdminHeader() {
             <Link href="/admin/dashboard">ダッシュボード</Link>
             <Link href="/admin/users">社員管理</Link>
             <Link href="/admin/tools">工具管理</Link>
+            <Link href="/admin/admins">管理者管理</Link>
           </nav>
         </div>
 

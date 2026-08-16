@@ -48,5 +48,6 @@ model UserProfile {
   email     String
   name      String   @default("管理者")
   role      String   @default("ADMIN")
+  passwordSet  Boolean  @default(false)
   createdAt DateTime @default(now())
 }
