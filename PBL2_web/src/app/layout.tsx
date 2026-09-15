@@ -4,8 +4,8 @@ import Header from "@/app/_components/Header";
 import { AuthProvider } from "@/app/providers/AuthProvider";
 
 export const metadata: Metadata = {
-  title: "NextBlogApp",
-  description: "Built to learn Next.js and modern web development.",
+  title: "Smart Tool Shelf",
+  description: "工具の貸出・返却と在庫をリモートで管理するスマートツール棚システム。",
 };
 
 type Props = {

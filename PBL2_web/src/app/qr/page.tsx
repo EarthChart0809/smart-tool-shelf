@@ -48,14 +48,29 @@ export default function QRPage() {
   };
 
   return (
-    <main className="mx-auto max-w-xl p-10">
-      <h1 className="mb-6 text-center text-3xl font-bold">
-        QRコードをかざしてください
-      </h1>
+    <main className="min-h-[calc(100vh-4rem)]">
+      <div className="container-app max-w-md py-12">
+        <div className="text-center">
+          <h1 className="page-title">QRコードでログイン</h1>
+          <p className="mt-2 text-sm text-muted">
+            社員QRコードをカメラの枠内にかざしてください。
+          </p>
+        </div>
 
-      <QRScanner onRead={loginUser} />
+        <div className="mt-8 overflow-hidden rounded-xl border border-line bg-white shadow-sm">
+          <QRScanner onRead={loginUser} />
+        </div>
 
-      {loading && <p className="mt-6 text-center">ログイン中...</p>}
+        {loading && (
+          <p className="mt-6 flex items-center justify-center gap-2 text-sm text-muted">
+            <span
+              className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-line"
+              style={{ borderTopColor: "var(--brand)" }}
+            />
+            ログインしています…
+          </p>
+        )}
+      </div>
     </main>
   );
 }

@@ -82,65 +82,83 @@ export default function AdminToolsPage() {
   };
 
   return (
-    <main className="mx-auto max-w-3xl p-6">
-      <h1 className="mb-6 text-3xl font-bold">工具管理</h1>
+    <main className="container-app max-w-3xl py-8">
+      <h1 className="page-title">工具管理</h1>
+      <p className="mt-2 mb-6 text-sm text-muted">
+        工具の登録・在庫調整・削除ができます。
+      </p>
 
-      <div className="mb-8 flex gap-3 rounded-lg border bg-white p-5 shadow">
-        <input
-          className="flex-1 rounded border p-2"
-          placeholder="工具名"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
-        <input
-          className="w-24 rounded border p-2"
-          placeholder="在庫数"
-          type="number"
-          value={stock}
-          onChange={(e) => setStock(e.target.value)}
-        />
-        <input
-          className="w-28 rounded border p-2"
-          placeholder="ボックスID"
-          type="number"
-          value={boxId}
-          onChange={(e) => setBoxId(e.target.value)}
-        />
-        <button
-          onClick={handleAdd}
-          className="rounded bg-blue-700 px-4 text-white"
-        >
-          追加
-        </button>
+      {/* 新規追加フォーム */}
+      <div className="card card-pad mb-8">
+        <h2 className="section-title mb-4">工具を追加</h2>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+          <div className="flex-1">
+            <label className="label">工具名</label>
+            <input
+              className="input"
+              placeholder="例：電動ドライバー"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+          </div>
+          <div className="w-full sm:w-24">
+            <label className="label">在庫数</label>
+            <input
+              className="input"
+              placeholder="0"
+              type="number"
+              value={stock}
+              onChange={(e) => setStock(e.target.value)}
+            />
+          </div>
+          <div className="w-full sm:w-28">
+            <label className="label">ボックスID</label>
+            <input
+              className="input"
+              placeholder="1"
+              type="number"
+              value={boxId}
+              onChange={(e) => setBoxId(e.target.value)}
+            />
+          </div>
+          <button onClick={handleAdd} className="btn btn-primary sm:flex-none">
+            追加
+          </button>
+        </div>
       </div>
 
-      {error && <p className="mb-4 text-red-600">{error}</p>}
+      {error && (
+        <p className="banner banner-info mb-4 text-sm" style={{ fontWeight: 500 }}>
+          {error}
+        </p>
+      )}
 
+      {/* 工具リスト */}
       <div className="space-y-3">
         {tools.map((tool) => (
           <div
             key={tool.id}
-            className="flex items-center justify-between rounded-lg border bg-white p-4 shadow"
+            className="card card-pad flex items-center justify-between gap-4"
           >
-            <div>
-              <p className="font-bold">{tool.name}</p>
-              <p className="text-sm text-gray-500">ボックスID: {tool.boxId}</p>
+            <div className="min-w-0">
+              <p className="font-bold text-foreground">{tool.name}</p>
+              <p className="mt-0.5 text-sm text-muted">
+                ボックスID {tool.boxId}
+              </p>
             </div>
 
-            <div className="flex items-center gap-3">
-              <label className="text-sm text-gray-500">在庫:</label>
+            <div className="flex flex-none items-center gap-3">
+              <label className="text-sm text-muted">在庫</label>
               <input
                 type="number"
                 defaultValue={tool.stock}
-                className="w-20 rounded border p-1 text-center"
-                onBlur={(e) =>
-                  handleStockChange(tool.id, Number(e.target.value))
-                }
+                className="input w-20 text-center"
+                onBlur={(e) => handleStockChange(tool.id, Number(e.target.value))}
               />
 
               <button
                 onClick={() => handleDelete(tool.id)}
-                className="rounded bg-red-600 px-3 py-1 text-white"
+                className="btn btn-danger btn-sm"
               >
                 削除
               </button>
@@ -149,7 +167,9 @@ export default function AdminToolsPage() {
         ))}
 
         {tools.length === 0 && (
-          <p className="text-gray-500">工具が登録されていません。</p>
+          <div className="card card-pad text-center text-muted">
+            工具が登録されていません。
+          </div>
         )}
       </div>
     </main>

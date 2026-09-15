@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import QRCode from "qrcode";
 
 interface User {
@@ -33,21 +34,42 @@ export default function UsersPage() {
   };
 
   return (
-    <main className="mx-auto max-w-5xl p-8">
-      <h1 className="mb-8 text-3xl font-bold">社員一覧</h1>
+    <main className="container-app max-w-5xl py-8">
+      <div className="mb-6 flex items-center justify-between gap-4">
+        <div>
+          <h1 className="page-title">社員一覧</h1>
+          <p className="mt-2 text-sm text-muted">
+            登録済みの社員とログイン用QRコードです。
+          </p>
+        </div>
+        <Link href="/admin/users/new" className="btn btn-primary flex-none">
+          ＋ 社員を登録
+        </Link>
+      </div>
 
-      <div className="grid grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {users.map((user) => (
-          <div key={user.id} className="rounded-lg border p-5 shadow">
-            <h2 className="text-xl font-bold">{user.name}</h2>
-
-            <p>{user.employeeId}</p>
+          <div key={user.id} className="card card-hover card-pad text-center">
+            <h2 className="text-lg font-bold text-foreground">{user.name}</h2>
+            <p className="mt-0.5 text-sm text-muted">{user.employeeId}</p>
 
             {qrCodes[user.id] && (
-              <img src={qrCodes[user.id]} alt="QR" className="mt-4" />
+              <div className="mt-4 flex justify-center">
+                <img
+                  src={qrCodes[user.id]}
+                  alt={`${user.name} のQRコード`}
+                  className="h-40 w-40 rounded-lg border border-line"
+                />
+              </div>
             )}
           </div>
         ))}
+
+        {users.length === 0 && (
+          <div className="card card-pad col-span-full text-center text-muted">
+            社員が登録されていません。
+          </div>
+        )}
       </div>
     </main>
   );

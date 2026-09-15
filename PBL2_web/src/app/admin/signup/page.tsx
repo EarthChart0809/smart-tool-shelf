@@ -39,42 +39,69 @@ export default function AdminSignupPage() {
   };
 
   return (
-    <main className="mx-auto max-w-md p-8">
-      <h1 className="mb-8 text-3xl font-bold">管理者アカウント作成</h1>
+    <main className="container-app max-w-md py-14">
+      <div className="card card-pad">
+        <h1 className="page-title text-center">管理者アカウント作成</h1>
+        <p className="mt-2 mb-8 text-center text-sm text-muted">
+          新しく管理者を登録します。
+        </p>
 
-      <div className="space-y-5">
-        <input
-          className="w-full rounded border p-3"
-          placeholder="表示名(ヘッダーに表示されます)"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
+        <div className="space-y-4">
+          <div>
+            <label className="label">表示名</label>
+            <input
+              className="input"
+              placeholder="ヘッダーに表示されます"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+          </div>
 
-        <input
-          className="w-full rounded border p-3"
-          placeholder="メールアドレス"
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
+          <div>
+            <label className="label">メールアドレス</label>
+            <input
+              className="input"
+              placeholder="admin@example.com"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
 
-        <input
-          className="w-full rounded border p-3"
-          placeholder="パスワード"
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+          <div>
+            <label className="label">パスワード</label>
+            <input
+              className="input"
+              placeholder="••••••••"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
 
-        {error && <p className="text-red-600">{error}</p>}
-        {message && <p className="text-green-700">{message}</p>}
+          {error && (
+            <p className="banner banner-info text-sm" style={{ fontWeight: 500 }}>
+              {error}
+            </p>
+          )}
+          {message && (
+            <p
+              className="banner text-sm"
+              style={{
+                fontWeight: 500,
+                background: "var(--ok-soft)",
+                color: "var(--ok)",
+                borderColor: "#bfe6cd",
+              }}
+            >
+              {message}
+            </p>
+          )}
 
-        <button
-          onClick={handleSignup}
-          className="w-full rounded bg-green-700 py-3 text-white"
-        >
-          確認メールを送信する
-        </button>
+          <button onClick={handleSignup} className="btn btn-primary w-full">
+            確認メールを送信する
+          </button>
+        </div>
       </div>
     </main>
   );
