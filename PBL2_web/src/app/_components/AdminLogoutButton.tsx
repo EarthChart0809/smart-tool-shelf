@@ -14,7 +14,10 @@ export default function AdminLogoutButton() {
   };
 
   return (
-    <button onClick={handleLogout} className="text-sm underline">
+    <button
+      onClick={handleLogout}
+      className="rounded-md border border-white/25 px-3 py-1.5 text-sm font-medium text-white/90 transition hover:bg-white/10"
+    >
       ログアウト
     </button>
   );

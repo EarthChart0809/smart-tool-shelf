@@ -11,7 +11,7 @@ export default function QRScanner({ onRead }: QRScannerProps) {
   const scanned = useRef(false);
 
   return (
-    <div className="overflow-hidden rounded-xl border bg-white shadow">
+    <div className="bg-black/5">
       <Scanner
         constraints={{
           facingMode: "environment",

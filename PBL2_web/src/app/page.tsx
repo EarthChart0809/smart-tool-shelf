@@ -153,53 +153,79 @@ export default function Home() {
     await loadMyRentals();
   };
 
+  const selectedCount = tools.reduce((sum, t) => sum + t.quantity, 0);
+
   if (!user) {
     return (
-      <main className="min-h-screen bg-gray-100">
-        <div className="mx-auto max-w-xl p-10 text-center">
-          <p className="mb-6 text-lg">工具を借りるにはログインが必要です。</p>
-
-          <button
-            onClick={() => router.push("/qr")}
-            className="rounded bg-blue-600 px-6 py-3 font-bold text-white"
-          >
-            QRコードでログイン
-          </button>
+      <main className="min-h-[calc(100vh-4rem)]">
+        <div className="container-app grid min-h-[calc(100vh-4rem)] max-w-md place-items-center py-16">
+          <div className="card card-pad w-full text-center">
+            <div
+              className="mx-auto mb-5 grid h-14 w-14 place-items-center rounded-2xl text-white"
+              style={{ background: "var(--brand)" }}
+            >
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+                <path
+                  d="M12 15a3 3 0 100-6 3 3 0 000 6z"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                />
+                <path
+                  d="M4 8V6a2 2 0 012-2h12a2 2 0 012 2v2M4 8h16M4 8v10a2 2 0 002 2h12a2 2 0 002-2V8"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
+              </svg>
+            </div>
+            <h1 className="text-xl font-bold text-foreground">
+              工具を借りるにはログインが必要です
+            </h1>
+            <p className="mt-2 text-sm text-muted">
+              社員QRコードをかざしてログインしてください。
+            </p>
+            <button
+              onClick={() => router.push("/qr")}
+              className="btn btn-primary mt-6 w-full"
+            >
+              QRコードでログイン
+            </button>
+          </div>
         </div>
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-gray-100">
-      <div className="mx-auto max-w-3xl p-6">
+    <main className="min-h-[calc(100vh-4rem)] pb-28">
+      <div className="container-app max-w-3xl py-8">
         {unlockMessage && (
-          <p className="mb-4 rounded bg-blue-100 p-3 text-center text-blue-800">
-            {unlockMessage}
-          </p>
+          <p className="banner banner-info mb-6 text-center">{unlockMessage}</p>
         )}
 
         {myRentals.length > 0 && (
-          <section className="mb-8">
-            <h2 className="mb-3 text-xl font-bold">あなたが借りている工具</h2>
+          <section className="mb-10">
+            <h2 className="section-title mb-4">あなたが借りている工具</h2>
 
             <div className="space-y-3">
               {myRentals.map((rental) => (
                 <div
                   key={rental.id}
-                  className="flex items-center justify-between rounded-lg border bg-white p-4 shadow"
+                  className="card card-pad flex items-center justify-between gap-4"
                 >
-                  <div>
-                    <p className="font-bold">{rental.tool.name}</p>
-                    <p className="text-sm text-gray-500">
-                      数量: {rental.quantity} / 貸出:
+                  <div className="min-w-0">
+                    <p className="font-bold text-foreground">
+                      {rental.tool.name}
+                    </p>
+                    <p className="mt-0.5 text-sm text-muted">
+                      数量 {rental.quantity} ・ 貸出{" "}
                       {new Date(rental.borrowedAt).toLocaleString("ja-JP")}
                     </p>
                   </div>
 
                   <button
                     onClick={() => handleReturn(rental, rental.tool.boxId)}
-                    className="rounded bg-blue-600 px-4 py-2 text-white"
+                    className="btn btn-outline btn-sm flex-none"
                   >
                     返却する
                   </button>
@@ -210,9 +236,9 @@ export default function Home() {
         )}
 
         <section>
-          <h2 className="mb-3 text-xl font-bold">工具を借りる</h2>
+          <h2 className="section-title mb-4">工具を借りる</h2>
 
-          <div className="space-y-4">
+          <div className="space-y-3">
             {tools.map((tool) => (
               <ToolCard
                 key={tool.id}
@@ -222,15 +248,31 @@ export default function Home() {
                 disabled={!user}
               />
             ))}
-          </div>
 
+            {tools.length === 0 && (
+              <div className="card card-pad text-center text-muted">
+                貸出できる工具がありません。
+              </div>
+            )}
+          </div>
+        </section>
+      </div>
+
+      {/* 開錠バー（画面下に固定） */}
+      <div className="fixed inset-x-0 bottom-0 z-20 border-t border-line bg-white/95 backdrop-blur">
+        <div className="container-app flex max-w-3xl items-center justify-between gap-4 py-3">
+          <p className="text-sm text-muted">
+            選択中{" "}
+            <span className="font-bold text-foreground">{selectedCount}</span> 点
+          </p>
           <button
             onClick={handleUnlock}
-            className="mt-6 w-full rounded bg-blue-500 py-3 font-bold text-white hover:bg-blue-700"
+            disabled={selectedCount === 0}
+            className="btn btn-primary"
           >
             開錠する
           </button>
-        </section>
+        </div>
       </div>
     </main>
   );

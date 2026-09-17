@@ -25,30 +25,38 @@ export default function NewUserPage() {
   };
 
   return (
-    <main className="mx-auto max-w-md p-8">
-      <h1 className="mb-8 text-3xl font-bold">社員登録</h1>
+    <main className="container-app max-w-md py-14">
+      <div className="card card-pad">
+        <h1 className="page-title text-center">社員登録</h1>
+        <p className="mt-2 mb-8 text-center text-sm text-muted">
+          新しい社員を登録します。登録後、一覧からQRコードを発行できます。
+        </p>
 
-      <div className="space-y-5">
-        <input
-          className="w-full rounded border p-3"
-          placeholder="社員番号"
-          value={employeeId}
-          onChange={(e) => setEmployeeId(e.target.value)}
-        />
+        <div className="space-y-4">
+          <div>
+            <label className="label">社員番号</label>
+            <input
+              className="input"
+              placeholder="例：E-1024"
+              value={employeeId}
+              onChange={(e) => setEmployeeId(e.target.value)}
+            />
+          </div>
 
-        <input
-          className="w-full rounded border p-3"
-          placeholder="氏名"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
+          <div>
+            <label className="label">氏名</label>
+            <input
+              className="input"
+              placeholder="例：山田 太郎"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+          </div>
 
-        <button
-          onClick={register}
-          className="w-full rounded bg-green-700 py-3 text-white"
-        >
-          登録
-        </button>
+          <button onClick={register} className="btn btn-primary w-full">
+            登録する
+          </button>
+        </div>
       </div>
     </main>
   );

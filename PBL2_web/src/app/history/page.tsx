@@ -1,8 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Header from "@/app/_components/Header";
-import { unlockBoxesViaLan } from "@/lib/esp32-client";
 
 interface RentalWithRelations {
   id: number;
@@ -65,46 +63,51 @@ export default function HistoryPage() {
   };
 
   return (
-    <main className="min-h-screen bg-gray-100">
-
-      <div className="mx-auto max-w-4xl p-6">
-        <h1 className="mb-2 text-3xl font-bold">貸出履歴</h1>
-        <p className="mb-6 text-sm text-gray-500">
+    <main className="min-h-[calc(100vh-4rem)]">
+      <div className="container-app max-w-4xl py-8">
+        <h1 className="page-title">貸出履歴</h1>
+        <p className="mt-2 mb-6 text-sm text-muted">
           返却操作は、社員本人がQRコードでログインした画面から行ってください。
-          {isAdmin && "(管理者としてログイン中のため、代理返却も可能です)"}
+          {isAdmin && "（管理者としてログイン中のため、代理返却も可能です）"}
         </p>
 
-        <div className="overflow-hidden rounded-lg border bg-white shadow">
-          <table className="w-full text-left">
-            <thead className="bg-gray-200">
+        <div className="table-wrap">
+          <table className="table-app">
+            <thead>
               <tr>
-                <th className="p-3">工具</th>
-                <th className="p-3">借りた人</th>
-                <th className="p-3">数量</th>
-                <th className="p-3">貸出日時</th>
-                <th className="p-3">状態</th>
-                {isAdmin && <th className="p-3"></th>}
+                <th>工具</th>
+                <th>借りた人</th>
+                <th>数量</th>
+                <th>貸出日時</th>
+                <th>状態</th>
+                {isAdmin && <th></th>}
               </tr>
             </thead>
 
             <tbody>
               {rentals.map((rental) => (
-                <tr key={rental.id} className="border-t">
-                  <td className="p-3">{rental.tool.name}</td>
-                  <td className="p-3">{rental.user.name}</td>
-                  <td className="p-3">{rental.quantity}</td>
-                  <td className="p-3">
+                <tr key={rental.id}>
+                  <td className="font-medium">{rental.tool.name}</td>
+                  <td>{rental.user.name}</td>
+                  <td className="tabular-nums">{rental.quantity}</td>
+                  <td className="text-muted">
                     {new Date(rental.borrowedAt).toLocaleString("ja-JP")}
                   </td>
-                  <td className="p-3">
-                    {rental.returnedAt ? "返却済み" : "貸出中"}
+                  <td>
+                    {rental.returnedAt ? (
+                      <span className="badge badge-muted">返却済み</span>
+                    ) : (
+                      <span className="badge badge-out">貸出中</span>
+                    )}
                   </td>
                   {isAdmin && (
-                    <td className="p-3">
+                    <td>
                       {!rental.returnedAt && (
                         <button
-                          onClick={() => handleAdminReturn(rental.id, rental.tool.boxId)}
-                          className="rounded bg-orange-600 px-3 py-1 text-white"
+                          onClick={() =>
+                            handleAdminReturn(rental.id, rental.tool.boxId)
+                          }
+                          className="btn btn-outline btn-sm"
                         >
                           代理返却
                         </button>
@@ -113,6 +116,17 @@ export default function HistoryPage() {
                   )}
                 </tr>
               ))}
+
+              {rentals.length === 0 && (
+                <tr>
+                  <td
+                    colSpan={isAdmin ? 6 : 5}
+                    className="py-10 text-center text-muted"
+                  >
+                    貸出履歴がありません。
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

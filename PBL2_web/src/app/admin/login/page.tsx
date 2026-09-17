@@ -30,34 +30,46 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <main className="mx-auto max-w-md p-8">
-      <h1 className="mb-8 text-3xl font-bold">管理者ログイン</h1>
+    <main className="container-app max-w-md py-14">
+      <div className="card card-pad">
+        <h1 className="page-title text-center">管理者ログイン</h1>
+        <p className="mt-2 mb-8 text-center text-sm text-muted">
+          管理機能を利用するにはログインしてください。
+        </p>
 
-      <div className="space-y-5">
-        <input
-          className="w-full rounded border p-3"
-          placeholder="メールアドレス"
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
+        <div className="space-y-4">
+          <div>
+            <label className="label">メールアドレス</label>
+            <input
+              className="input"
+              placeholder="admin@example.com"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
 
-        <input
-          className="w-full rounded border p-3"
-          placeholder="パスワード"
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+          <div>
+            <label className="label">パスワード</label>
+            <input
+              className="input"
+              placeholder="••••••••"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
 
-        {error && <p className="text-red-600">{error}</p>}
+          {error && (
+            <p className="banner banner-info text-sm" style={{ fontWeight: 500 }}>
+              {error}
+            </p>
+          )}
 
-        <button
-          onClick={handleLogin}
-          className="w-full rounded bg-blue-700 py-3 text-white"
-        >
-          ログイン
-        </button>
+          <button onClick={handleLogin} className="btn btn-primary w-full">
+            ログイン
+          </button>
+        </div>
       </div>
     </main>
   );
