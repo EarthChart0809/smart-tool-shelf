@@ -1,5 +1,6 @@
 "use client";
 
+import { unlockBoxesViaLan } from "@/lib/esp32-client";
 import { useEffect, useState } from "react";
 
 interface RentalWithRelations {

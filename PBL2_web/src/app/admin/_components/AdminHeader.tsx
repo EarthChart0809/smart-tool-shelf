@@ -25,21 +25,29 @@ export default async function AdminHeader() {
 
           <nav className="hidden items-center gap-1 sm:flex">
             <Link
+              href="/admin/dashboard"
+              className="rounded-md px-3 py-1.5 text-sm font-medium text-white/70 transition hover:bg-white/10 hover:text-white"
+            >
+              ダッシュボード
+            </Link>
+            <Link
               href="/admin/users"
               className="rounded-md px-3 py-1.5 text-sm font-medium text-white/70 transition hover:bg-white/10 hover:text-white"
             >
               社員管理
             </Link>
-            <Link
-              href="/admin/tools"
-              className="rounded-md px-3 py-1.5 text-sm font-medium text-white/70 transition hover:bg-white/10 hover:text-white"
+            <Link 
+            href="/admin/tools"
+            className="rounded-md px-3 py-1.5 text-sm font-medium text-white/70 transition hover:bg-white/10 hover:text-white"
             >
               工具管理
             </Link>
-            <Link href="/admin/dashboard">ダッシュボード</Link>
-            <Link href="/admin/users">社員管理</Link>
-            <Link href="/admin/tools">工具管理</Link>
-            <Link href="/admin/admins">管理者管理</Link>
+            <Link 
+            href="/admin/admins" 
+            className="rounded-md px-3 py-1.5 text-sm font-medium text-white/70 transition hover:bg-white/10 hover:text-white"
+            >
+              管理者管理
+            </Link>
           </nav>
         </div>
 
