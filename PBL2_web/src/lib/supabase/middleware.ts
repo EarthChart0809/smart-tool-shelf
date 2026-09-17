@@ -1,10 +1,9 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { prisma } from "@/lib/prisma";
 
 export async function updateSession(request: NextRequest) {
-  let response = NextResponse.next({
-    request,
-  });
+  let response = NextResponse.next({ request });
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -19,9 +18,7 @@ export async function updateSession(request: NextRequest) {
             request.cookies.set(name, value),
           );
 
-          response = NextResponse.next({
-            request,
-          });
+          response = NextResponse.next({ request });
 
           cookiesToSet.forEach(({ name, value, options }) =>
             response.cookies.set(name, value, options),
@@ -37,14 +34,23 @@ export async function updateSession(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
 
-  // ログイン・サインアップ画面自体は保護対象から除外する
-  // (以前は /admin 配下すべてが対象になっており、ログイン画面自体が
-  //  無限リダイレクトを起こしうる状態だった)
-  const isPublicAdminPath =
-    pathname === "/admin/login" || pathname === "/admin/signup";
+  const isPublicAdminPath = pathname === "/admin/login";
+  const isSetPasswordPath = pathname === "/admin/set-password";
 
   if (pathname.startsWith("/admin") && !isPublicAdminPath && !user) {
     return NextResponse.redirect(new URL("/admin/login", request.url));
+  }
+
+  // 招待直後でまだパスワードを設定していない管理者は、
+  // 設定完了ページ以外の管理画面に入れないようにする
+  if (user && pathname.startsWith("/admin") && !isSetPasswordPath) {
+    const profile = await prisma.userProfile.findUnique({
+      where: { id: user.id },
+    });
+
+    if (profile && !profile.passwordSet) {
+      return NextResponse.redirect(new URL("/admin/set-password", request.url));
+    }
   }
 
   return response;

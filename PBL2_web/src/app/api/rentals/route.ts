@@ -2,26 +2,13 @@ import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/authorization";
 import { NextRequest, NextResponse } from "next/server";
 
-// 貸出履歴の一覧を取得
-// ?userId=1 を付けると、その社員の「返却済みでない」貸出だけに絞り込む
-// (QRログイン後の画面で「自分が借りているもの」を表示するために使う)
 export async function GET(request: NextRequest) {
   const userId = request.nextUrl.searchParams.get("userId");
 
   const rentals = await prisma.rental.findMany({
-    where: userId
-      ? {
-          userId: Number(userId),
-          returnedAt: null,
-        }
-      : undefined,
-    orderBy: {
-      borrowedAt: "desc",
-    },
-    include: {
-      user: true,
-      tool: true,
-    },
+    where: userId ? { userId: Number(userId), returnedAt: null } : undefined,
+    orderBy: { borrowedAt: "desc" },
+    include: { user: true, tool: true },
   });
 
   return NextResponse.json(rentals);
@@ -55,23 +42,22 @@ export async function POST(request: NextRequest) {
 
     await prisma.tool.update({
       where: { id: tool.id },
-      data: { stock: { decrement: tool.quantity } },
+      data: {
+        stock: { decrement: tool.quantity },
+        // 貸出のたびに使用回数を加算し、工具の寿命管理に使う
+        useCount: { increment: tool.quantity },
+      },
     });
   }
 
   return NextResponse.json({ success: true });
 }
 
-// 返却処理
-// - body.userId がある場合: QRログイン中の本人による返却。自分の貸出でなければ拒否
-// - body.userId が無い場合: 管理者による代理返却とみなし、Supabase Authでの管理者ログインを必須にする
 export async function PATCH(request: NextRequest) {
   const body = await request.json();
   const { rentalId, userId } = body as { rentalId: number; userId?: number };
 
-  const rental = await prisma.rental.findUnique({
-    where: { id: rentalId },
-  });
+  const rental = await prisma.rental.findUnique({ where: { id: rentalId } });
 
   if (!rental) {
     return NextResponse.json(
@@ -88,7 +74,6 @@ export async function PATCH(request: NextRequest) {
   }
 
   if (userId) {
-    // 本人による返却:貸出記録のuserIdと一致するか確認
     if (rental.userId !== userId) {
       return NextResponse.json(
         { success: false, message: "自分の貸出のみ返却できます。" },
@@ -96,7 +81,6 @@ export async function PATCH(request: NextRequest) {
       );
     }
   } else {
-    // userIdが無い＝管理画面からの代理返却。管理者ログインを必須にする
     try {
       await requireAdmin();
     } catch (error) {

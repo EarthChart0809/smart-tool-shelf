@@ -21,12 +21,25 @@ export async function PATCH(
   const { id } = await params;
   const body = await request.json();
 
+  // 「交換」操作:交換したら使用回数を0にリセットする
+  if (body.replace === true) {
+    const tool = await prisma.tool.update({
+      where: { id: Number(id) },
+      data: { useCount: 0 },
+    });
+
+    return NextResponse.json({ success: true, tool });
+  }
+
   const tool = await prisma.tool.update({
     where: { id: Number(id) },
     data: {
       ...(body.name !== undefined && { name: body.name }),
       ...(body.stock !== undefined && { stock: Number(body.stock) }),
       ...(body.boxId !== undefined && { boxId: Number(body.boxId) }),
+      ...(body.lifeLimit !== undefined && {
+        lifeLimit: Number(body.lifeLimit),
+      }),
     },
   });
 
@@ -45,17 +58,13 @@ export async function DELETE(
 
   const { id } = await params;
 
-  // 貸出履歴に紐づいている工具は削除できないようにする(データ整合性のため)
   const rentalCount = await prisma.rental.count({
     where: { toolId: Number(id) },
   });
 
   if (rentalCount > 0) {
     return NextResponse.json(
-      {
-        success: false,
-        message: "貸出履歴が存在するため削除できません。",
-      },
+      { success: false, message: "貸出履歴が存在するため削除できません。" },
       { status: 409 },
     );
   }

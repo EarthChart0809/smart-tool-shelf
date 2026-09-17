@@ -15,10 +15,7 @@ export async function GET() {
     return authErrorResponse(error);
   }
 
-  const tools = await prisma.tool.findMany({
-    orderBy: { boxId: "asc" },
-  });
-
+  const tools = await prisma.tool.findMany({ orderBy: { boxId: "asc" } });
   return NextResponse.json(tools);
 }
 
@@ -43,6 +40,8 @@ export async function POST(request: NextRequest) {
       name: body.name,
       stock: Number(body.stock),
       boxId: Number(body.boxId),
+      // 交換推奨回数(未指定なら200回をデフォルトとする)
+      lifeLimit: body.lifeLimit ? Number(body.lifeLimit) : 200,
     },
   });
 

@@ -15,12 +15,9 @@ Servo servo3;
 #define SERVO1_PIN 18
 #define SERVO2_PIN 19
 #define SERVO3_PIN 21
-
-// 解錠から何ミリ秒後に自動施錠するか
 #define AUTO_LOCK_MS 8000
 
-// 各ボックスが「今解錠中かどうか」と「解錠した時刻」を管理する
-bool isUnlocked[4] = {false, false, false, false}; // index 1〜3を使う
+bool isUnlocked[4] = {false, false, false, false};
 unsigned long unlockedAt[4] = {0, 0, 0, 0};
 
 Servo* servoFor(int id)
@@ -42,8 +39,6 @@ void unlockBox(int id)
     s->write(90);
     isUnlocked[id] = true;
     unlockedAt[id] = millis();
-
-    Serial.printf("box %d unlocked\n", id);
 }
 
 void lockBox(int id)
@@ -53,23 +48,16 @@ void lockBox(int id)
 
     s->write(0);
     isUnlocked[id] = false;
-
-    Serial.printf("box %d auto-locked\n", id);
 }
 
 void lockAll()
 {
-    for (int id = 1; id <= 3; id++)
-    {
-        lockBox(id);
-    }
+    for (int id = 1; id <= 3; id++) lockBox(id);
 }
 
-// loop() から毎回呼ぶ。時間切れのボックスを自動施錠する
 void checkAutoLock()
 {
     unsigned long now = millis();
-
     for (int id = 1; id <= 3; id++)
     {
         if (isUnlocked[id] && (now - unlockedAt[id] >= AUTO_LOCK_MS))
@@ -79,8 +67,28 @@ void checkAutoLock()
     }
 }
 
+// ブラウザ(操作端末)から直接叩かれるようになるため、CORSヘッダーを必ず付与する
+void addCorsHeaders()
+{
+    server.sendHeader("Access-Control-Allow-Origin", "*");
+    server.sendHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+    server.sendHeader("Access-Control-Allow-Headers", "Content-Type");
+    // Chrome の Private Network Access (PNA) 対策:
+    // 「公開サイトからプライベートIPへのアクセスを許可する」ことを明示する
+    server.sendHeader("Access-Control-Allow-Private-Network", "true");
+}
+
+// preflight (OPTIONS) リクエストへの応答
+void handleOptions()
+{
+    addCorsHeaders();
+    server.send(204);
+}
+
 void handleUnlock()
 {
+    addCorsHeaders();
+
     if (!server.hasArg("plain"))
     {
         server.send(400, "text/plain", "No Body");
@@ -122,10 +130,6 @@ void setup()
 
     WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
 
-    server.onNotFound([]() {
-        server.send(404, "text/plain", "Not Found");
-    });
-
     while (WiFi.status() != WL_CONNECTED)
     {
         delay(500);
@@ -136,6 +140,11 @@ void setup()
     Serial.println(WiFi.localIP());
 
     server.on("/unlock", HTTP_POST, handleUnlock);
+    server.on("/unlock", HTTP_OPTIONS, handleOptions); // preflight用
+
+    server.onNotFound([]() {
+        server.send(404, "text/plain", "Not Found");
+    });
 
     server.begin();
 }
