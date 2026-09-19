@@ -32,16 +32,30 @@ export async function DELETE(
 
   const supabaseAdmin = createAdminClient();
 
-  const { error } = await supabaseAdmin.auth.admin.deleteUser(id);
+  try {
+    const { error } = await supabaseAdmin.auth.admin.deleteUser(id);
 
-  if (error) {
+    if (error) {
+      return NextResponse.json(
+        { success: false, message: error.message },
+        { status: 400 },
+      );
+    }
+
+    await prisma.userProfile.deleteMany({
+      where: { id },
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("管理者削除エラー:", error);
+
     return NextResponse.json(
-      { success: false, message: error.message },
-      { status: 400 },
+      {
+        success: false,
+        message: "管理者の削除に失敗しました。",
+      },
+      { status: 500 },
     );
   }
-
-  await prisma.userProfile.delete({ where: { id } });
-
-  return NextResponse.json({ success: true });
 }

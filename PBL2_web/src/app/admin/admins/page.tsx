@@ -23,8 +23,17 @@ export default function AdminAdminsPage() {
 
   const load = async () => {
     const response = await fetch("/api/admin/admins");
-    const data = await response.json();
-    if (response.ok) setAdmins(data);
+    const data = await response.json().catch(() => ({
+      success: false,
+      message: "サーバーエラーが発生しました。",
+    }));
+
+    if (!response.ok || !data.success) {
+      alert(data.message ?? "削除に失敗しました。");
+      return;
+    }
+
+    setAdmins(data);
   };
 
   const handleInvite = async () => {
@@ -37,9 +46,12 @@ export default function AdminAdminsPage() {
       body: JSON.stringify({ name, email }),
     });
 
-    const data = await response.json();
+    const data = await response.json().catch(() => ({
+      success: false,
+      message: "サーバーエラーが発生しました。",
+    }));
 
-    if (!data.success) {
+    if (!response.ok || !data.success) {
       setError(data.message ?? "招待に失敗しました。");
       return;
     }
@@ -57,9 +69,12 @@ export default function AdminAdminsPage() {
       method: "DELETE",
     });
 
-    const data = await response.json();
+    const data = await response.json().catch(() => ({
+      success: false,
+      message: "サーバーエラーが発生しました。",
+    }));
 
-    if (!data.success) {
+    if (!response.ok || !data.success) {
       alert(data.message ?? "削除に失敗しました。");
       return;
     }
