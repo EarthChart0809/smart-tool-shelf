@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import CsvUploader from "@/app/admin/_components/CsvUploader";
 
 export default function NewUserPage() {
   const [employeeId, setEmployeeId] = useState("");
@@ -28,9 +29,19 @@ export default function NewUserPage() {
     <main className="container-app max-w-md py-14">
       <div className="card card-pad">
         <h1 className="page-title text-center">社員登録</h1>
-        <p className="mt-2 mb-8 text-center text-sm text-muted">
+        <p className="text-muted mt-2 mb-8 text-center text-sm">
           新しい社員を登録します。登録後、一覧からQRコードを発行できます。
         </p>
+
+        <CsvUploader
+          endpoint="/api/admin/users/bulk"
+          templateHeaders={["employeeId", "name"]}
+          templateFileName="社員一括登録テンプレート.csv"
+          description="1行目をヘッダー行(employeeId, name)にしてください。既に登録済みの社員番号はスキップされます。"
+          onComplete={() => {
+            alert("一括登録が完了しました。");
+          }}
+        />
 
         <div className="space-y-4">
           <div>

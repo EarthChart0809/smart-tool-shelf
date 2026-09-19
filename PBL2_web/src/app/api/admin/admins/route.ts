@@ -28,7 +28,7 @@ export async function GET() {
     },
   });
 
-  return NextResponse.json(admins);
+  return NextResponse.json({ success: true, admins });
 }
 
 export async function POST(request: NextRequest) {

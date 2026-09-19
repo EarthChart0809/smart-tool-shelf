@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import LifeGauge from "@/app/admin/_components/LifeGauge";
+import CsvUploader from "@/app/admin/_components/CsvUploader";
 
 interface Tool {
   id: number;
@@ -112,9 +113,17 @@ export default function AdminToolsPage() {
   return (
     <main className="container-app max-w-3xl py-8">
       <h1 className="page-title">工具管理</h1>
-      <p className="mt-2 mb-6 text-sm text-muted">
+      <p className="text-muted mt-2 mb-6 text-sm">
         工具の登録・在庫調整・削除ができます。
       </p>
+
+      <CsvUploader
+        endpoint="/api/admin/tools/bulk"
+        templateHeaders={["name", "stock", "boxId", "lifeLimit"]}
+        templateFileName="工具一括登録テンプレート.csv"
+        description="1行目をヘッダー行(name, stock, boxId, lifeLimit)にしてください。lifeLimitは省略可能で、未指定なら200になります。"
+        onComplete={load}
+      />
 
       {/* 新規追加フォーム */}
       <div className="card card-pad mb-8">
@@ -156,7 +165,10 @@ export default function AdminToolsPage() {
       </div>
 
       {error && (
-        <p className="banner banner-info mb-4 text-sm" style={{ fontWeight: 500 }}>
+        <p
+          className="banner banner-info mb-4 text-sm"
+          style={{ fontWeight: 500 }}
+        >
           {error}
         </p>
       )}
@@ -169,19 +181,21 @@ export default function AdminToolsPage() {
             className="card card-pad flex items-center justify-between gap-4"
           >
             <div className="min-w-0">
-              <p className="font-bold text-foreground">{tool.name}</p>
-              <p className="mt-0.5 text-sm text-muted">
+              <p className="text-foreground font-bold">{tool.name}</p>
+              <p className="text-muted mt-0.5 text-sm">
                 ボックスID {tool.boxId}
               </p>
             </div>
 
             <div className="flex flex-none items-center gap-3">
-              <label className="text-sm text-muted">在庫</label>
+              <label className="text-muted text-sm">在庫</label>
               <input
                 type="number"
                 defaultValue={tool.stock}
                 className="input w-20 text-center"
-                onBlur={(e) => handleStockChange(tool.id, Number(e.target.value))}
+                onBlur={(e) =>
+                  handleStockChange(tool.id, Number(e.target.value))
+                }
               />
 
               <label className="text-sm text-gray-500">交換推奨:</label>
@@ -212,7 +226,7 @@ export default function AdminToolsPage() {
         ))}
 
         {tools.length === 0 && (
-          <div className="card card-pad text-center text-muted">
+          <div className="card card-pad text-muted text-center">
             工具が登録されていません。
           </div>
         )}
