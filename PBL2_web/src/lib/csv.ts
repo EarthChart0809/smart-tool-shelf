@@ -68,3 +68,26 @@ export function parseCsvToObjects(text: string): Record<string, string>[] {
     return obj;
   });
 }
+
+// オブジェクトの配列をCSV文字列に変換する
+// (フィールドにカンマ・改行・ダブルクォートが含まれていても壊れないようエスケープする)
+export function toCsv(rows: Record<string, string | number>[], headers: string[]): string {
+  const escapeField = (value: string | number) => {
+    const str = String(value);
+
+    if (str.includes(",") || str.includes("\n") || str.includes('"')) {
+      return `"${str.replace(/"/g, '""')}"`;
+    }
+
+    return str;
+  };
+
+  const headerLine = headers.join(",");
+
+  const bodyLines = rows.map((row) =>
+    headers.map((header) => escapeField(row[header] ?? "")).join(","),
+  );
+
+  // Excelで文字化けしないようBOMを付与する
+  return "\uFEFF" + [headerLine, ...bodyLines].join("\n");
+}

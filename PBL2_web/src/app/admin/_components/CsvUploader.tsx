@@ -1,9 +1,11 @@
 "use client";
 
 import { useRef, useState } from "react";
+import CsvExportButton from "@/app/admin/_components/CsvExportButton";
 
 interface Props {
-  endpoint: string;
+  importEndpoint: string;
+  exportEndpoint: string;
   templateHeaders: string[];
   templateFileName: string;
   description: string;
@@ -11,7 +13,8 @@ interface Props {
 }
 
 export default function CsvUploader({
-  endpoint,
+  importEndpoint,
+  exportEndpoint,
   templateHeaders,
   templateFileName,
   description,
@@ -34,7 +37,7 @@ export default function CsvUploader({
     try {
       const csv = await file.text();
 
-      const response = await fetch(endpoint, {
+      const response = await fetch(importEndpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ csv }),
@@ -58,7 +61,6 @@ export default function CsvUploader({
   };
 
   const downloadTemplate = () => {
-    // Excelで開いたときに文字化けしないようBOMを付与する
     const csv = "\uFEFF" + templateHeaders.join(",") + "\n";
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
@@ -73,15 +75,22 @@ export default function CsvUploader({
 
   return (
     <div className="mb-8 rounded-lg border bg-white p-5 shadow">
-      <div className="mb-3 flex items-center justify-between">
-        <h2 className="font-bold">CSVで一括登録</h2>
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+        <h2 className="font-bold">CSV一括登録・出力</h2>
 
-        <button
-          onClick={downloadTemplate}
-          className="text-sm text-blue-700 underline"
-        >
-          テンプレートをダウンロード
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={downloadTemplate}
+            className="text-sm text-blue-700 underline"
+          >
+            テンプレートをダウンロード
+          </button>
+
+          <CsvExportButton
+            endpoint={exportEndpoint}
+            label="現在のデータをCSVで出力"
+          />
+        </div>
       </div>
 
       <p className="mb-3 text-sm text-gray-500">{description}</p>

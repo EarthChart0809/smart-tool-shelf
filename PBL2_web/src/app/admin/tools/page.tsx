@@ -118,12 +118,13 @@ export default function AdminToolsPage() {
       </p>
 
       <CsvUploader
-        endpoint="/api/admin/tools/bulk"
-        templateHeaders={["name", "stock", "boxId", "lifeLimit"]}
-        templateFileName="工具一括登録テンプレート.csv"
-        description="1行目をヘッダー行(name, stock, boxId, lifeLimit)にしてください。lifeLimitは省略可能で、未指定なら200になります。"
-        onComplete={load}
-      />
+  importEndpoint="/api/admin/tools/bulk"
+  exportEndpoint="/api/admin/tools/export"
+  templateHeaders={["name", "stock", "boxId", "lifeLimit"]}
+  templateFileName="工具一括登録テンプレート.csv"
+  description="1行目をヘッダー行(name, stock, boxId, lifeLimit)にしてください。lifeLimitは省略可能で、未指定なら200になります。"
+  onComplete={load}
+/>
 
       {/* 新規追加フォーム */}
       <div className="card card-pad mb-8">
