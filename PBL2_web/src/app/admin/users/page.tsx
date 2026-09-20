@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import QRCode from "qrcode";
+import QrBulkDownload from "@/app/admin/_components/QrBulkDownload";
 
 interface User {
   id: number;
@@ -38,7 +39,7 @@ export default function UsersPage() {
       <div className="mb-6 flex items-center justify-between gap-4">
         <div>
           <h1 className="page-title">社員一覧</h1>
-          <p className="mt-2 text-sm text-muted">
+          <p className="text-muted mt-2 text-sm">
             登録済みの社員とログイン用QRコードです。
           </p>
         </div>
@@ -47,18 +48,31 @@ export default function UsersPage() {
         </Link>
       </div>
 
+      <div className="mb-8 flex flex-wrap items-center gap-3 rounded-lg border bg-white p-5 shadow">
+        <h2 className="w-full font-bold">QRコードの一括出力</h2>
+
+        <QrBulkDownload users={users} />
+
+        <Link
+          href="/admin/users/print"
+          className="rounded bg-gray-700 px-4 py-2 text-sm text-white"
+        >
+          印刷用ページを開く
+        </Link>
+      </div>
+
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {users.map((user) => (
           <div key={user.id} className="card card-hover card-pad text-center">
-            <h2 className="text-lg font-bold text-foreground">{user.name}</h2>
-            <p className="mt-0.5 text-sm text-muted">{user.employeeId}</p>
+            <h2 className="text-foreground text-lg font-bold">{user.name}</h2>
+            <p className="text-muted mt-0.5 text-sm">{user.employeeId}</p>
 
             {qrCodes[user.id] && (
               <div className="mt-4 flex justify-center">
                 <img
                   src={qrCodes[user.id]}
                   alt={`${user.name} のQRコード`}
-                  className="h-40 w-40 rounded-lg border border-line"
+                  className="border-line h-40 w-40 rounded-lg border"
                 />
               </div>
             )}
@@ -66,7 +80,7 @@ export default function UsersPage() {
         ))}
 
         {users.length === 0 && (
-          <div className="card card-pad col-span-full text-center text-muted">
+          <div className="card card-pad text-muted col-span-full text-center">
             社員が登録されていません。
           </div>
         )}

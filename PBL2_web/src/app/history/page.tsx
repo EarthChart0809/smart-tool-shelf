@@ -2,6 +2,7 @@
 
 import { unlockBoxesViaLan } from "@/lib/esp32-client";
 import { useEffect, useState } from "react";
+import CsvExportButton from "@/app/admin/_components/CsvExportButton";
 
 interface RentalWithRelations {
   id: number;
@@ -67,10 +68,17 @@ export default function HistoryPage() {
     <main className="min-h-[calc(100vh-4rem)]">
       <div className="container-app max-w-4xl py-8">
         <h1 className="page-title">貸出履歴</h1>
-        <p className="mt-2 mb-6 text-sm text-muted">
+        <p className="text-muted mt-2 mb-6 text-sm">
           返却操作は、社員本人がQRコードでログインした画面から行ってください。
           {isAdmin && "（管理者としてログイン中のため、代理返却も可能です）"}
         </p>
+
+        {isAdmin && (
+          <CsvExportButton
+            endpoint="/api/admin/rentals/export"
+            label="貸出履歴をCSVで出力"
+          />
+        )}
 
         <div className="table-wrap">
           <table className="table-app">
@@ -122,7 +130,7 @@ export default function HistoryPage() {
                 <tr>
                   <td
                     colSpan={isAdmin ? 6 : 5}
-                    className="py-10 text-center text-muted"
+                    className="text-muted py-10 text-center"
                   >
                     貸出履歴がありません。
                   </td>

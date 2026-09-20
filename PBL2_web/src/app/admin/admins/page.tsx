@@ -33,7 +33,7 @@ export default function AdminAdminsPage() {
       return;
     }
 
-    setAdmins(data);
+    setAdmins(data.admins);
   };
 
   const handleInvite = async () => {
