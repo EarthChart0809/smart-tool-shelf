@@ -55,7 +55,7 @@ export default async function AdminHeader() {
           <div className="flex items-center gap-3 text-sm">
             <span className="hidden items-center gap-2 sm:flex">
               <span className="grid h-7 w-7 place-items-center rounded-full bg-white/15 text-xs font-bold">
-                {profile.name?.charAt(0) ?? "?"}
+                <Link href="/admin/profile">{profile.name?.charAt(0) ?? "?"}</Link>
               </span>
               {profile.name}
             </span>
