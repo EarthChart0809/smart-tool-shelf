@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/authorization";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { NextRequest, NextResponse } from "next/server";
+import { logAction } from "@/lib/audit";
 
 function authErrorResponse(error: unknown) {
   const message = error instanceof Error ? error.message : "認証エラー";
@@ -31,6 +32,15 @@ export async function DELETE(
   }
 
   const supabaseAdmin = createAdminClient();
+
+  await logAction({
+  actorType: "ADMIN",
+  actorId: currentAdmin.id,
+  actorName: currentAdmin.name,
+  action: "ADMIN_DELETE",
+  targetType: "UserProfile",
+  targetId: id,
+});
 
   try {
     const { error } = await supabaseAdmin.auth.admin.deleteUser(id);

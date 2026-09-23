@@ -11,6 +11,7 @@ export default function AdminLoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [resetMessage, setResetMessage] = useState("");
 
   const handleLogin = async () => {
     setError("");
@@ -27,6 +28,29 @@ export default function AdminLoginPage() {
 
     router.push("/admin/users");
     router.refresh();
+  };
+
+  const handleResetRequest = async () => {
+    setError("");
+    setResetMessage("");
+
+    if (!email) {
+      setError("パスワードリセットには、まずメールアドレスを入力してください。");
+      return;
+    }
+
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/admin/set-password`,
+    });
+
+    // メールの存在有無を外部から判別できないよう、成功時と同じ文言にする
+    if (error) {
+      console.error(error);
+    }
+
+    setResetMessage(
+      "そのメールアドレスが登録されていれば、パスワード再設定用のメールを送信しました。",
+    );
   };
 
   return (
@@ -69,6 +93,13 @@ export default function AdminLoginPage() {
           <button onClick={handleLogin} className="btn btn-primary w-full">
             ログイン
           </button>
+
+           <button
+          onClick={handleResetRequest}
+          className="w-full text-sm text-blue-700 underline"
+        >
+          パスワードを忘れた場合
+        </button>
         </div>
       </div>
     </main>

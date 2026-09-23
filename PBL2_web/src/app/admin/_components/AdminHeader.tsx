@@ -48,6 +48,11 @@ export default async function AdminHeader() {
             >
               管理者管理
             </Link>
+            <Link href="/admin/audit-log"
+            className="rounded-md px-3 py-1.5 text-sm font-medium text-white/70 transition hover:bg-white/10 hover:text-white"
+            >
+              操作ログ
+            </Link>
           </nav>
         </div>
 
@@ -55,7 +60,7 @@ export default async function AdminHeader() {
           <div className="flex items-center gap-3 text-sm">
             <span className="hidden items-center gap-2 sm:flex">
               <span className="grid h-7 w-7 place-items-center rounded-full bg-white/15 text-xs font-bold">
-                {profile.name?.charAt(0) ?? "?"}
+                <Link href="/admin/profile">{profile.name?.charAt(0) ?? "?"}</Link>
               </span>
               {profile.name}
             </span>

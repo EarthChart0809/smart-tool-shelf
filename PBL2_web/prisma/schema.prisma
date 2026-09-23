@@ -51,3 +51,15 @@ model UserProfile {
   passwordSet  Boolean  @default(false)
   createdAt DateTime @default(now())
 }
+
+model AuditLog {
+  id         Int      @id @default(autoincrement())
+  actorType  String   // "ADMIN" | "EMPLOYEE" | "SYSTEM"
+  actorId    String   // 管理者はUUID文字列、社員はUser.idを文字列化して格納
+  actorName  String
+  action     String   // 例: "RENTAL_CREATE", "TOOL_DELETE" など
+  targetType String?  // "User" | "Tool" | "Rental" | "UserProfile"
+  targetId   String?
+  detail     String?  // 追加情報をJSON文字列で保存
+  createdAt  DateTime @default(now())
+}

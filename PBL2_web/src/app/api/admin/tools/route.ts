@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/authorization";
+import { logAction } from "@/lib/audit";
 import { NextRequest, NextResponse } from "next/server";
 
 function authErrorResponse(error: unknown) {
@@ -20,8 +21,10 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  let admin;
+
   try {
-    await requireAdmin();
+    admin = await requireAdmin();
   } catch (error) {
     return authErrorResponse(error);
   }
@@ -40,9 +43,18 @@ export async function POST(request: NextRequest) {
       name: body.name,
       stock: Number(body.stock),
       boxId: Number(body.boxId),
-      // 交換推奨回数(未指定なら200回をデフォルトとする)
       lifeLimit: body.lifeLimit ? Number(body.lifeLimit) : 200,
     },
+  });
+
+  await logAction({
+    actorType: "ADMIN",
+    actorId: admin.id,
+    actorName: admin.name,
+    action: "TOOL_CREATE",
+    targetType: "Tool",
+    targetId: String(tool.id),
+    detail: { name: tool.name, stock: tool.stock, boxId: tool.boxId },
   });
 
   return NextResponse.json({ success: true, tool });
