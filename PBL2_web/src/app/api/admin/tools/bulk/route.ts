@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/authorization";
 import { parseCsvToObjects } from "@/lib/csv";
 import { NextRequest, NextResponse } from "next/server";
+import { logAction } from "@/lib/audit";
 
 function authErrorResponse(error: unknown) {
   const message = error instanceof Error ? error.message : "認証エラー";
@@ -10,8 +11,10 @@ function authErrorResponse(error: unknown) {
 }
 
 export async function POST(request: NextRequest) {
+  let admin;
+
   try {
-    await requireAdmin();
+    admin = await requireAdmin();
   } catch (error) {
     return authErrorResponse(error);
   }
@@ -68,6 +71,15 @@ export async function POST(request: NextRequest) {
 
     created.push(name);
   }
+
+  await logAction({
+    actorType: "ADMIN",
+    actorId: admin.id,
+    actorName: admin.name,
+    action: "TOOL_BULK_IMPORT",
+    targetType: "Tool",
+    detail: { createdCount: created.length, errorCount: errors.length },
+  });
 
   return NextResponse.json({
     success: true,
