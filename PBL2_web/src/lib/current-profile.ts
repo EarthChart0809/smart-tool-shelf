@@ -1,8 +1,8 @@
-import { createClient } from "@/lib/supabase/server";
+import { createReadonlyClient } from "@/lib/supabase/server-readonly";
 import { syncUserProfile } from "@/lib/auth";
 
 export async function getCurrentUserProfile() {
-  const supabase = await createClient();
+  const supabase = await createReadonlyClient();
 
   const {
     data: { user },
