@@ -49,32 +49,31 @@ export default function QRPage() {
     router.push("/");
   };
 
+  // トップページ（ログイン前）にもこのまま埋め込んで使う
   return (
-    <main className="container-app max-w-md py-10 text-center">
-      <div className="icon-tile mx-auto mb-4">
-        <FontAwesomeIcon icon={faQrcode} />
-      </div>
-      <h1 className="page-title">QRコードでログイン</h1>
-      <p className="page-desc">
-        社員QRコードをカメラの枠内にかざしてください。
-      </p>
-
-      <div className="card mt-6 overflow-hidden p-1.5">
+    <section className="container-app max-w-md py-2 text-center">
+      <div className="card overflow-hidden p-1.5">
         <div className="overflow-hidden rounded-[var(--radius-sm)]">
           <QRScanner onRead={loginUser} />
         </div>
       </div>
 
       {loading ? (
-        <p className="text-muted mt-5 flex items-center justify-center gap-2 text-sm">
+        <p className="text-muted mt-4 flex items-center justify-center gap-2 text-sm">
           <span className="spinner" />
           ログインしています…
         </p>
       ) : (
-        <p className="text-muted mt-4 text-xs">
-          カメラが起動しない場合は、ブラウザのカメラの使用を許可してください。
-        </p>
+        <>
+          <p className="mt-4 flex items-center justify-center gap-2 text-sm font-bold">
+            <FontAwesomeIcon icon={faQrcode} className="text-brand" />
+            社員QRコードをカメラにかざしてください
+          </p>
+          <p className="text-muted mt-1 text-xs">
+            カメラが起動しない場合は、ブラウザのカメラの使用を許可してください。
+          </p>
+        </>
       )}
-    </main>
+    </section>
   );
 }

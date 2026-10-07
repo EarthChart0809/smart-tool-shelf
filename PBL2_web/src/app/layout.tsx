@@ -3,7 +3,6 @@ import { Noto_Sans_JP } from "next/font/google";
 import { config } from "@fortawesome/fontawesome-svg-core";
 import "@fortawesome/fontawesome-svg-core/styles.css";
 import "./globals.css";
-import Header from "@/app/_components/Header";
 import { AuthProvider } from "@/app/providers/AuthProvider";
 
 // アイコン(Font Awesome)のCSSは上で読み込むので、自動挿入は止める（表示のちらつき防止）
@@ -33,7 +32,6 @@ const RootLayout: React.FC<Props> = (props) => {
     <html lang="ja" className={notoSansJp.variable}>
       <body>
         <AuthProvider>
-          <Header />
           <div>{children}</div>
         </AuthProvider>
       </body>

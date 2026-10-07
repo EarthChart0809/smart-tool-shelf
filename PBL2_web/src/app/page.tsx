@@ -1,14 +1,17 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faQrcode,
+  faArrowRightFromBracket,
+  faClockRotateLeft,
   faRotateLeft,
   faUnlock,
+  faUserGear,
 } from "@fortawesome/free-solid-svg-icons";
 import ToolCard from "@/app/_components/ToolCard";
+import QRLogin from "@/app/qr/page";
 import { Tool } from "@/app/types/tool";
 import { useAuth } from "@/app/providers/AuthProvider";
 import { unlockBoxesViaLan } from "@/lib/esp32-client";
@@ -21,8 +24,7 @@ interface MyRental {
 }
 
 export default function Home() {
-  const router = useRouter();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
 
   const [tools, setTools] = useState<(Tool & { quantity: number })[]>([]);
   const [myRentals, setMyRentals] = useState<MyRental[]>([]);
@@ -163,36 +165,68 @@ export default function Home() {
 
   if (!user) {
     return (
-      <main className="container-app max-w-md py-12">
-        <div className="card p-8 text-center">
-          <div className="icon-tile mx-auto mb-4">
-            <FontAwesomeIcon icon={faQrcode} />
-          </div>
-          <h1 className="text-lg font-bold">
-            工具を借りるにはログインが必要です
-          </h1>
-          <p className="page-desc">
-            社員QRコードをカメラにかざしてログインしてください。
+      <main className="py-10 sm:py-14">
+        <div className="text-center">
+          <p className="text-muted text-xs font-bold tracking-[0.3em]">
+            SMART TOOL SHELF
           </p>
-          <button
-            onClick={() => router.push("/qr")}
-            className="btn btn-primary mt-6 w-full"
+          <h1 className="page-title mt-2">工具を借りる・返す</h1>
+        </div>
+
+        {/* QRコードをかざすとそのままログイン */}
+        <div className="mt-6">
+          <QRLogin />
+        </div>
+
+        {/* サブ: 貸出履歴 / 管理者 */}
+        <div className="container-app mt-6 grid max-w-md grid-cols-2 gap-3">
+          <Link
+            href="/history"
+            className="card flex items-center justify-center gap-2 py-3.5 text-sm font-bold transition hover:border-[var(--foreground)]"
           >
-            <FontAwesomeIcon icon={faQrcode} />
-            QRコードでログイン
-          </button>
+            <FontAwesomeIcon icon={faClockRotateLeft} className="text-muted" />
+            貸出履歴
+          </Link>
+          <Link
+            href="/admin/login"
+            className="card text-muted flex items-center justify-center gap-2 py-3.5 text-sm transition hover:border-[var(--foreground)] hover:text-[var(--foreground)]"
+          >
+            <FontAwesomeIcon icon={faUserGear} />
+            管理者
+          </Link>
         </div>
       </main>
     );
   }
 
   return (
-    <main className="min-h-[calc(100vh-4rem)] pb-28">
+    <main className="min-h-screen pb-28">
       <div className="container-app max-w-3xl py-8">
-        <h1 className="page-title">工具を借りる</h1>
-        <p className="page-desc">
-          借りたい工具の数を選んで、画面下の「開錠する」を押してください。
-        </p>
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <h1 className="page-title">工具を借りる</h1>
+            <p className="page-desc">
+              借りたい工具の数を選んで、画面下の「開錠する」を押してください。
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="mr-1 flex items-center gap-2 text-sm">
+              <span className="bg-brand grid h-8 w-8 place-items-center rounded-full text-sm font-bold text-white">
+                {user.name?.charAt(0) ?? "?"}
+              </span>
+              {user.name}
+            </span>
+            <Link href="/history" className="btn btn-outline btn-sm">
+              <FontAwesomeIcon icon={faClockRotateLeft} />
+              貸出履歴
+            </Link>
+            <button onClick={logout} className="btn btn-outline btn-sm">
+              <FontAwesomeIcon icon={faArrowRightFromBracket} />
+              ログアウト
+            </button>
+          </div>
+        </div>
 
         {unlockMessage && (
           <p className="banner banner-ok mt-6 text-center">{unlockMessage}</p>

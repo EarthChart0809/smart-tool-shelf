@@ -3,6 +3,9 @@
 import { unlockBoxesViaLan } from "@/lib/esp32-client";
 import { useEffect, useState } from "react";
 import CsvExportButton from "@/app/admin/_components/CsvExportButton";
+import Link from "next/link";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 
 interface RentalWithRelations {
   id: number;
@@ -66,6 +69,15 @@ export default function HistoryPage() {
 
   return (
     <main className="container-app max-w-5xl py-8">
+      <div className="mb-6">
+        <Link
+          href="/"
+          className="text-muted hover:text-foreground inline-flex items-center gap-2 text-sm"
+        >
+          <FontAwesomeIcon icon={faArrowLeft} />
+          トップへ戻る
+        </Link>
+      </div>
       <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="page-title">貸出履歴</h1>

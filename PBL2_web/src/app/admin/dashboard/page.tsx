@@ -3,9 +3,7 @@
 import { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faArrowRightFromBracket,
-  faBoxOpen,
-  faRotateLeft,
+  faHandHolding,
   faToolbox,
   faTriangleExclamation,
   type IconDefinition,
@@ -107,85 +105,132 @@ export default function AdminDashboardPage() {
   const maxCount = Math.max(...hourly.map((h) => h.count), 0);
   const peak = hourly.find((h) => h.count === maxCount && maxCount > 0);
 
-  const needsAttention =
-    data.lowStockTools.length > 0 || data.criticalTools.length > 0;
+  // 要確認 = 在庫不足 + 交換間近
+  const attentionCount = data.lowStockTools.length + data.criticalTools.length;
+
+  // 最近の操作: 貸出と返却を1つのリストにまとめて新しい順に並べる
+  const recentActions = [
+    ...data.recentBorrows.map((rental) => ({
+      key: `b-${rental.id}`,
+      rental,
+      type: "貸出" as const,
+      date: rental.borrowedAt,
+    })),
+    ...data.recentReturns.map((rental) => ({
+      key: `r-${rental.id}`,
+      rental,
+      type: "返却" as const,
+      date: rental.returnedAt ?? rental.borrowedAt,
+    })),
+  ].sort((x, y) => new Date(y.date).getTime() - new Date(x.date).getTime());
 
   return (
     <main className="container-app max-w-5xl py-8">
       <h1 className="page-title">ダッシュボード</h1>
       <p className="page-desc">
-        {today}　登録社員 {data.employeeCount}人／登録工具 {data.toolCount}種類
+        {today}　今日の貸出 {data.todayBorrowedCount}件／返却{" "}
+        {data.todayReturnedCount}件　登録社員 {data.employeeCount}人
       </p>
 
-      <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-        <StatCard
-          icon={faArrowRightFromBracket}
-          label="今日の貸出"
-          value={data.todayBorrowedCount}
-          unit="件"
-        />
-        <StatCard
-          icon={faRotateLeft}
-          label="今日の返却"
-          value={data.todayReturnedCount}
-          unit="件"
-        />
+      <div className="mt-6 grid grid-cols-3 gap-3">
         <StatCard
           icon={faToolbox}
-          label="現在貸出中"
+          label="工具"
+          value={data.toolCount}
+          unit="種類"
+        />
+        <StatCard
+          icon={faHandHolding}
+          label="貸出"
           value={data.currentlyBorrowedCount}
           unit="個"
         />
         <StatCard
-          icon={faBoxOpen}
-          label="在庫不足"
-          value={data.lowStockTools.length}
-          unit="種類"
-          tone={data.lowStockTools.length > 0 ? "alert" : undefined}
-        />
-        <StatCard
           icon={faTriangleExclamation}
-          label="要交換間近"
-          value={data.criticalTools.length}
-          unit="種類"
-          tone={data.criticalTools.length > 0 ? "warn" : undefined}
+          label="要確認"
+          value={attentionCount}
+          unit="件"
+          tone={attentionCount > 0 ? "alert" : undefined}
         />
       </div>
 
-      {needsAttention && (
-        <section className="panel mt-5">
+      <div className="mt-5 grid items-start gap-5 lg:grid-cols-[3fr_2fr]">
+        {/* 最近の操作 */}
+        <section className="panel">
           <div className="panel-head">
-            <h2 className="section-title">対応が必要な工具</h2>
+            <h2 className="section-title">最近の操作</h2>
           </div>
+
+          {recentActions.length === 0 && (
+            <p className="panel-body text-muted text-sm">履歴がありません。</p>
+          )}
+
+          <ul>
+            {recentActions.map(({ key, rental, type, date }) => (
+              <li
+                key={key}
+                className="panel-row grid grid-cols-[6rem_1fr_auto] items-center gap-3 text-sm"
+              >
+                <span className="truncate">{rental.user.name}</span>
+                <span className="min-w-0 truncate font-bold">
+                  {rental.tool.name}
+                  <span className="text-muted ml-1 font-normal">
+                    × {rental.quantity}
+                  </span>
+                </span>
+                <span className="flex items-center gap-3">
+                  <span className="text-muted hidden text-xs tabular-nums sm:inline">
+                    {new Date(date).toLocaleString("ja-JP")}
+                  </span>
+                  <span
+                    className={`badge ${type === "貸出" ? "badge-out" : "badge-muted"}`}
+                  >
+                    {type}
+                  </span>
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        {/* 要確認の内訳 */}
+        <section className="panel">
+          <div className="panel-head">
+            <h2 className="section-title">
+              要確認
+              <span className="count">{attentionCount}</span>
+            </h2>
+          </div>
+
+          {attentionCount === 0 && (
+            <p className="panel-body text-muted text-sm">
+              対応が必要な工具はありません。
+            </p>
+          )}
+
           {data.lowStockTools.map((tool) => (
             <div
               key={`stock-${tool.id}`}
-              className="panel-row flex items-center justify-between gap-4"
+              className="panel-row flex items-center justify-between gap-3"
             >
-              <p className="font-bold">{tool.name}</p>
-              <div className="flex items-center gap-3">
-                <span className="text-muted text-sm">残り {tool.stock} 個</span>
-                <span className="badge badge-out">在庫不足</span>
+              <div className="min-w-0">
+                <p className="truncate text-sm font-bold">{tool.name}</p>
+                <p className="text-muted text-xs">残り {tool.stock} 個</p>
               </div>
+              <span className="badge badge-out">在庫不足</span>
             </div>
           ))}
           {data.criticalTools.map((tool) => (
-            <div
-              key={`life-${tool.id}`}
-              className="panel-row flex items-center justify-between gap-4"
-            >
-              <p className="font-bold">{tool.name}</p>
-              <div className="flex items-center gap-3">
-                <LifeMeter
-                  useCount={tool.useCount}
-                  lifeLimit={tool.lifeLimit}
-                />
+            <div key={`life-${tool.id}`} className="panel-row space-y-2">
+              <div className="flex items-center justify-between gap-3">
+                <p className="truncate text-sm font-bold">{tool.name}</p>
                 <span className="badge badge-warn">交換間近</span>
               </div>
+              <LifeMeter useCount={tool.useCount} lifeLimit={tool.lifeLimit} />
             </div>
           ))}
         </section>
-      )}
+      </div>
 
       <div className="mt-5 grid items-start gap-5 lg:grid-cols-2">
         <section className="panel">
@@ -252,22 +297,6 @@ export default function AdminDashboardPage() {
 
         <AiAnalysisPanel />
       </div>
-
-      <div className="mt-5 grid items-start gap-5 md:grid-cols-2">
-        <section className="panel">
-          <div className="panel-head">
-            <h2 className="section-title">最近の貸出</h2>
-          </div>
-          <RentalList rentals={data.recentBorrows} dateField="borrowedAt" />
-        </section>
-
-        <section className="panel">
-          <div className="panel-head">
-            <h2 className="section-title">最近の返却</h2>
-          </div>
-          <RentalList rentals={data.recentReturns} dateField="returnedAt" />
-        </section>
-      </div>
     </main>
   );
 }
@@ -300,45 +329,6 @@ function StatCard({
         <span className="stat-unit">{unit}</span>
       </p>
     </div>
-  );
-}
-
-function RentalList({
-  rentals,
-  dateField,
-}: {
-  rentals: RentalSummary[];
-  dateField: "borrowedAt" | "returnedAt";
-}) {
-  if (rentals.length === 0) {
-    return <p className="panel-body text-muted text-sm">履歴がありません。</p>;
-  }
-
-  return (
-    <ul>
-      {rentals.map((rental) => {
-        const date = rental[dateField];
-        return (
-          <li
-            key={rental.id}
-            className="panel-row flex items-center justify-between gap-3"
-          >
-            <div className="min-w-0">
-              <p className="truncate text-sm font-bold">
-                {rental.tool.name}
-                <span className="text-muted ml-1 font-normal">
-                  × {rental.quantity}
-                </span>
-              </p>
-              <p className="text-muted text-xs">{rental.user.name}</p>
-            </div>
-            <span className="text-muted flex-none text-xs tabular-nums">
-              {date ? new Date(date).toLocaleString("ja-JP") : ""}
-            </span>
-          </li>
-        );
-      })}
-    </ul>
   );
 }
 

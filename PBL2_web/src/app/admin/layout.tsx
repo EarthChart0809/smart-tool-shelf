@@ -8,7 +8,7 @@ export default function AdminLayout({
   return (
     <div className="admin-shell bg-background min-h-screen">
       <AdminHeader />
-      <div>{children}</div>
+      <div className="admin-main">{children}</div>
     </div>
   );
 }
