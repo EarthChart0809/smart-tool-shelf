@@ -1,17 +1,18 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faArrowRightFromBracket,
   faClockRotateLeft,
+  faQrcode,
   faRotateLeft,
   faUnlock,
   faUserGear,
 } from "@fortawesome/free-solid-svg-icons";
 import ToolCard from "@/app/_components/ToolCard";
-import QRLogin from "@/app/qr/page";
 import { Tool } from "@/app/types/tool";
 import { useAuth } from "@/app/providers/AuthProvider";
 import { unlockBoxesViaLan } from "@/lib/esp32-client";
@@ -24,6 +25,7 @@ interface MyRental {
 }
 
 export default function Home() {
+  const router = useRouter();
   const { user, logout } = useAuth();
 
   const [tools, setTools] = useState<(Tool & { quantity: number })[]>([]);
@@ -164,37 +166,56 @@ export default function Home() {
   const selectedCount = tools.reduce((sum, t) => sum + t.quantity, 0);
 
   if (!user) {
-    return (
-      <main className="py-10 sm:py-14">
-        <div className="text-center">
-          <p className="text-muted text-xs font-bold tracking-[0.3em]">
-            SMART TOOL SHELF
-          </p>
-          <h1 className="page-title mt-2">工具を借りる・返す</h1>
-        </div>
+    // 工具一覧が取得できていればサーバーと通信できている
+    const online = tools.length > 0;
 
-        {/* QRコードをかざすとそのままログイン */}
-        <div className="mt-6">
-          <QRLogin />
-        </div>
+    return (
+      <main className="container-app max-w-md py-12 text-center sm:py-16">
+        <p className="text-muted text-xs font-bold tracking-[0.3em]">
+          SMART TOOL SHELF
+        </p>
+        <h1 className="page-title mt-2">工具を借りる・返す</h1>
+
+        {/* メイン: QRコードでログイン */}
+        <button
+          onClick={() => router.push("/qr")}
+          className="card mt-8 flex w-full flex-col items-center gap-3 px-6 py-10 transition hover:border-[var(--brand)]"
+        >
+          <span className="icon-tile h-16 w-16 text-3xl">
+            <FontAwesomeIcon icon={faQrcode} />
+          </span>
+          <span className="text-lg font-bold">QRコードでログイン</span>
+          <span className="text-muted text-xs">
+            社員QRコードをカメラにかざしてください
+          </span>
+        </button>
 
         {/* サブ: 貸出履歴 / 管理者 */}
-        <div className="container-app mt-6 grid max-w-md grid-cols-2 gap-3">
+        <div className="mt-3 grid grid-cols-2 gap-3">
           <Link
             href="/history"
-            className="card flex items-center justify-center gap-2 py-3.5 text-sm font-bold transition hover:border-[var(--foreground)]"
+            className="card flex items-center justify-center gap-2 py-4 text-sm font-bold transition hover:border-[var(--foreground)]"
           >
             <FontAwesomeIcon icon={faClockRotateLeft} className="text-muted" />
             貸出履歴
           </Link>
           <Link
             href="/admin/login"
-            className="card text-muted flex items-center justify-center gap-2 py-3.5 text-sm transition hover:border-[var(--foreground)] hover:text-[var(--foreground)]"
+            className="card text-muted flex items-center justify-center gap-2 py-4 text-sm transition hover:border-[var(--foreground)] hover:text-[var(--foreground)]"
           >
             <FontAwesomeIcon icon={faUserGear} />
             管理者
           </Link>
         </div>
+
+        {/* システムの状態 */}
+        <p className="text-muted mt-10 flex items-center justify-center gap-2 text-xs">
+          <span
+            className="h-2 w-2 rounded-full"
+            style={{ background: online ? "var(--ok)" : "var(--muted-2)" }}
+          />
+          {online ? "システム正常稼働中" : "接続を確認しています…"}
+        </p>
       </main>
     );
   }

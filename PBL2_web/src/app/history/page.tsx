@@ -69,7 +69,8 @@ export default function HistoryPage() {
 
   return (
     <main className="container-app max-w-5xl py-8">
-      <div className="mb-6">
+      {/* back-link: 管理画面内で開いたときは globals.css で隠す（サイドバーがあるため） */}
+      <div className="back-link mb-6">
         <Link
           href="/"
           className="text-muted hover:text-foreground inline-flex items-center gap-2 text-sm"
