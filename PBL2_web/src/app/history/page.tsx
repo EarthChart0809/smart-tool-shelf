@@ -65,80 +65,81 @@ export default function HistoryPage() {
   };
 
   return (
-    <main className="min-h-[calc(100vh-4rem)]">
-      <div className="container-app max-w-4xl py-8">
-        <h1 className="page-title">貸出履歴</h1>
-        <p className="text-muted mt-2 mb-6 text-sm">
-          返却操作は、社員本人がQRコードでログインした画面から行ってください。
-          {isAdmin && "（管理者としてログイン中のため、代理返却も可能です）"}
-        </p>
-
+    <main className="container-app max-w-5xl py-8">
+      <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h1 className="page-title">貸出履歴</h1>
+          <p className="page-desc">
+            返却操作は、社員本人がQRコードでログインした画面から行ってください。
+            {isAdmin && "（管理者としてログイン中のため、代理返却も可能です）"}
+          </p>
+        </div>
         {isAdmin && (
           <CsvExportButton
             endpoint="/api/admin/rentals/export"
             label="貸出履歴をCSVで出力"
           />
         )}
+      </div>
 
-        <div className="table-wrap">
-          <table className="table-app">
-            <thead>
-              <tr>
-                <th>工具</th>
-                <th>借りた人</th>
-                <th>数量</th>
-                <th>貸出日時</th>
-                <th>状態</th>
-                {isAdmin && <th></th>}
-              </tr>
-            </thead>
+      <div className="table-wrap">
+        <table className="table-app">
+          <thead>
+            <tr>
+              <th>工具</th>
+              <th>借りた人</th>
+              <th>数量</th>
+              <th>貸出日時</th>
+              <th>状態</th>
+              {isAdmin && <th></th>}
+            </tr>
+          </thead>
 
-            <tbody>
-              {rentals.map((rental) => (
-                <tr key={rental.id}>
-                  <td className="font-medium">{rental.tool.name}</td>
-                  <td>{rental.user.name}</td>
-                  <td className="tabular-nums">{rental.quantity}</td>
-                  <td className="text-muted">
-                    {new Date(rental.borrowedAt).toLocaleString("ja-JP")}
-                  </td>
+          <tbody>
+            {rentals.map((rental) => (
+              <tr key={rental.id}>
+                <td className="font-medium">{rental.tool.name}</td>
+                <td>{rental.user.name}</td>
+                <td className="tabular-nums">{rental.quantity}</td>
+                <td className="text-muted">
+                  {new Date(rental.borrowedAt).toLocaleString("ja-JP")}
+                </td>
+                <td>
+                  {rental.returnedAt ? (
+                    <span className="badge badge-muted">返却済み</span>
+                  ) : (
+                    <span className="badge badge-out">貸出中</span>
+                  )}
+                </td>
+                {isAdmin && (
                   <td>
-                    {rental.returnedAt ? (
-                      <span className="badge badge-muted">返却済み</span>
-                    ) : (
-                      <span className="badge badge-out">貸出中</span>
+                    {!rental.returnedAt && (
+                      <button
+                        onClick={() =>
+                          handleAdminReturn(rental.id, rental.tool.boxId)
+                        }
+                        className="btn btn-outline btn-sm"
+                      >
+                        代理返却
+                      </button>
                     )}
                   </td>
-                  {isAdmin && (
-                    <td>
-                      {!rental.returnedAt && (
-                        <button
-                          onClick={() =>
-                            handleAdminReturn(rental.id, rental.tool.boxId)
-                          }
-                          className="btn btn-outline btn-sm"
-                        >
-                          代理返却
-                        </button>
-                      )}
-                    </td>
-                  )}
-                </tr>
-              ))}
+                )}
+              </tr>
+            ))}
 
-              {rentals.length === 0 && (
-                <tr>
-                  <td
-                    colSpan={isAdmin ? 6 : 5}
-                    className="text-muted py-10 text-center"
-                  >
-                    貸出履歴がありません。
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+            {rentals.length === 0 && (
+              <tr>
+                <td
+                  colSpan={isAdmin ? 6 : 5}
+                  className="text-muted py-10 text-center"
+                >
+                  貸出履歴がありません。
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </div>
     </main>
   );

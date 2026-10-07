@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import QRCode from "qrcode";
 import QrBulkDownload from "@/app/admin/_components/QrBulkDownload";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPrint, faUserPlus } from "@fortawesome/free-solid-svg-icons";
 
 interface User {
   id: number;
@@ -36,43 +38,47 @@ export default function UsersPage() {
 
   return (
     <main className="container-app max-w-5xl py-8">
-      <div className="mb-6 flex items-center justify-between gap-4">
+      <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="page-title">社員一覧</h1>
-          <p className="text-muted mt-2 text-sm">
-            登録済みの社員とログイン用QRコードです。
-          </p>
+          <h1 className="page-title">社員管理</h1>
+          <p className="page-desc">登録済みの社員とログイン用QRコードです。</p>
         </div>
-        <Link href="/admin/users/new" className="btn btn-primary flex-none">
-          ＋ 社員を登録
+        <Link href="/admin/users/new" className="btn btn-primary">
+          <FontAwesomeIcon icon={faUserPlus} />
+          社員を登録
         </Link>
       </div>
 
-      <div className="mb-8 flex flex-wrap items-center gap-3 rounded-lg border bg-white p-5 shadow">
-        <h2 className="w-full font-bold">QRコードの一括出力</h2>
+      <section className="panel mt-6">
+        <div className="panel-head">
+          <h2 className="section-title">QRコードの一括出力</h2>
+        </div>
+        <div className="panel-body flex flex-wrap items-start gap-3">
+          <QrBulkDownload users={users} />
+          <Link href="/admin/users/print" className="btn btn-outline btn-sm">
+            <FontAwesomeIcon icon={faPrint} />
+            印刷用ページを開く
+          </Link>
+        </div>
+      </section>
 
-        <QrBulkDownload users={users} />
+      <h2 className="section-title mt-8 mb-3">
+        社員一覧
+        <span className="count">{users.length}</span>
+      </h2>
 
-        <Link
-          href="/admin/users/print"
-          className="rounded bg-gray-700 px-4 py-2 text-sm text-white"
-        >
-          印刷用ページを開く
-        </Link>
-      </div>
-
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {users.map((user) => (
-          <div key={user.id} className="card card-hover card-pad text-center">
-            <h2 className="text-foreground text-lg font-bold">{user.name}</h2>
-            <p className="text-muted mt-0.5 text-sm">{user.employeeId}</p>
+          <div key={user.id} className="card card-pad text-center">
+            <p className="font-bold">{user.name}</p>
+            <p className="text-muted text-xs">{user.employeeId}</p>
 
             {qrCodes[user.id] && (
-              <div className="mt-4 flex justify-center">
+              <div className="mt-3 flex justify-center">
                 <img
                   src={qrCodes[user.id]}
                   alt={`${user.name} のQRコード`}
-                  className="border-line h-40 w-40 rounded-lg border"
+                  className="h-36 w-36"
                 />
               </div>
             )}

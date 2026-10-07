@@ -6,7 +6,7 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="admin-shell bg-background min-h-screen">
       <AdminHeader />
       <div>{children}</div>
     </div>

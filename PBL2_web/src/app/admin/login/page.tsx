@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import Image from "next/image";
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -35,7 +36,9 @@ export default function AdminLoginPage() {
     setResetMessage("");
 
     if (!email) {
-      setError("パスワードリセットには、まずメールアドレスを入力してください。");
+      setError(
+        "パスワードリセットには、まずメールアドレスを入力してください。",
+      );
       return;
     }
 
@@ -54,14 +57,23 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <main className="container-app max-w-md py-14">
-      <div className="card card-pad">
-        <h1 className="page-title text-center">管理者ログイン</h1>
-        <p className="mt-2 mb-8 text-center text-sm text-muted">
-          管理機能を利用するにはログインしてください。
-        </p>
+    <main className="container-app max-w-md py-12">
+      <div className="card p-8">
+        <div className="text-center">
+          <Image
+            src="/crescent.svg"
+            alt=""
+            width={36}
+            height={36}
+            className="mx-auto mb-3"
+          />
+          <h1 className="page-title">管理者ログイン</h1>
+          <p className="page-desc">
+            管理機能を利用するにはログインしてください。
+          </p>
+        </div>
 
-        <div className="space-y-4">
+        <div className="mt-7 space-y-4">
           <div>
             <label className="label">メールアドレス</label>
             <input
@@ -84,22 +96,18 @@ export default function AdminLoginPage() {
             />
           </div>
 
-          {error && (
-            <p className="banner banner-info text-sm" style={{ fontWeight: 500 }}>
-              {error}
-            </p>
-          )}
+          {error && <p className="banner banner-error">{error}</p>}
+          {resetMessage && <p className="banner banner-ok">{resetMessage}</p>}
 
           <button onClick={handleLogin} className="btn btn-primary w-full">
             ログイン
           </button>
 
-           <button
-          onClick={handleResetRequest}
-          className="w-full text-sm text-blue-700 underline"
-        >
-          パスワードを忘れた場合
-        </button>
+          <div className="text-center">
+            <button onClick={handleResetRequest} className="text-link">
+              パスワードを忘れた場合
+            </button>
+          </div>
         </div>
       </div>
     </main>

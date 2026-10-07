@@ -1,6 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faArrowRightFromBracket } from "@fortawesome/free-solid-svg-icons";
 import { createClient } from "@/lib/supabase/client";
 
 export default function AdminLogoutButton() {
@@ -14,10 +16,8 @@ export default function AdminLogoutButton() {
   };
 
   return (
-    <button
-      onClick={handleLogout}
-      className="rounded-md border border-white/25 px-3 py-1.5 text-sm font-medium text-white/90 transition hover:bg-white/10"
-    >
+    <button onClick={handleLogout} className="btn btn-on-dark btn-sm">
+      <FontAwesomeIcon icon={faArrowRightFromBracket} />
       ログアウト
     </button>
   );

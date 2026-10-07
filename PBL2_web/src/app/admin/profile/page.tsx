@@ -86,83 +86,108 @@ export default function AdminProfilePage() {
   };
 
   if (!profile) {
-    return <p className="p-6 text-gray-500">読み込み中...</p>;
+    return (
+      <p className="text-muted flex items-center justify-center gap-2 py-24 text-sm">
+        <span className="spinner" />
+        読み込み中...
+      </p>
+    );
   }
 
   return (
-    <main className="mx-auto max-w-xl p-6">
-      <h1 className="mb-6 text-3xl font-bold">アカウント設定</h1>
+    <main className="container-app max-w-3xl py-8">
+      <h1 className="page-title">アカウント設定</h1>
+      <p className="page-desc">表示名とパスワードを変更できます。</p>
 
-      <section className="mb-8 rounded-lg border bg-white p-5 shadow">
-        <h2 className="mb-3 font-bold">プロフィール</h2>
-
-        <div className="mb-4 text-sm text-gray-500">
-          <p>メールアドレス: {profile.email}</p>
-          <p>権限: {profile.role === "ADMIN" ? "管理者" : profile.role}</p>
-          <p>
-            登録日: {new Date(profile.createdAt).toLocaleDateString("ja-JP")}
-          </p>
+      <section className="panel mt-6">
+        <div className="panel-head">
+          <h2 className="section-title">プロフィール</h2>
         </div>
+        <div className="panel-body">
+          <dl className="mb-5 grid gap-3 text-sm sm:grid-cols-3">
+            <div>
+              <dt className="text-muted text-xs">メールアドレス</dt>
+              <dd className="break-all">{profile.email}</dd>
+            </div>
+            <div>
+              <dt className="text-muted text-xs">権限</dt>
+              <dd>{profile.role === "ADMIN" ? "管理者" : profile.role}</dd>
+            </div>
+            <div>
+              <dt className="text-muted text-xs">登録日</dt>
+              <dd>{new Date(profile.createdAt).toLocaleDateString("ja-JP")}</dd>
+            </div>
+          </dl>
 
-        <label className="mb-1 block text-sm text-gray-500">表示名</label>
-        <input
-          className="mb-3 w-full rounded border p-2"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
+          <label className="label">表示名</label>
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <input
+              className="input"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+            <button
+              onClick={handleUpdateName}
+              className="btn btn-primary flex-none"
+            >
+              表示名を更新
+            </button>
+          </div>
 
-        {nameError && <p className="mb-2 text-sm text-red-600">{nameError}</p>}
-        {nameMessage && (
-          <p className="mb-2 text-sm text-green-700">{nameMessage}</p>
-        )}
-
-        <button
-          onClick={handleUpdateName}
-          className="rounded bg-blue-700 px-4 py-2 text-sm text-white"
-        >
-          表示名を更新
-        </button>
+          {nameError && <p className="banner banner-error mt-3">{nameError}</p>}
+          {nameMessage && (
+            <p className="banner banner-ok mt-3">{nameMessage}</p>
+          )}
+        </div>
       </section>
 
-      <section className="rounded-lg border bg-white p-5 shadow">
-        <h2 className="mb-3 font-bold">パスワード変更</h2>
+      <section className="panel mt-5">
+        <div className="panel-head">
+          <h2 className="section-title">パスワード変更</h2>
+        </div>
+        <div className="panel-body space-y-3">
+          <div>
+            <label className="label">現在のパスワード</label>
+            <input
+              className="input"
+              placeholder="現在のパスワード"
+              type="password"
+              value={currentPassword}
+              onChange={(e) => setCurrentPassword(e.target.value)}
+            />
+          </div>
 
-        <div className="space-y-3">
-          <input
-            className="w-full rounded border p-2"
-            placeholder="現在のパスワード"
-            type="password"
-            value={currentPassword}
-            onChange={(e) => setCurrentPassword(e.target.value)}
-          />
-
-          <input
-            className="w-full rounded border p-2"
-            placeholder="新しいパスワード(8文字以上)"
-            type="password"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-          />
-
-          <input
-            className="w-full rounded border p-2"
-            placeholder="新しいパスワード(確認)"
-            type="password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-          />
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div>
+              <label className="label">新しいパスワード</label>
+              <input
+                className="input"
+                placeholder="新しいパスワード(8文字以上)"
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="label">新しいパスワード(確認)</label>
+              <input
+                className="input"
+                placeholder="新しいパスワード(確認)"
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+              />
+            </div>
+          </div>
 
           {passwordError && (
-            <p className="text-sm text-red-600">{passwordError}</p>
+            <p className="banner banner-error">{passwordError}</p>
           )}
           {passwordMessage && (
-            <p className="text-sm text-green-700">{passwordMessage}</p>
+            <p className="banner banner-ok">{passwordMessage}</p>
           )}
 
-          <button
-            onClick={handleChangePassword}
-            className="rounded bg-blue-700 px-4 py-2 text-sm text-white"
-          >
+          <button onClick={handleChangePassword} className="btn btn-primary">
             パスワードを変更
           </button>
         </div>

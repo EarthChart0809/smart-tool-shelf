@@ -2,6 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faQrcode,
+  faRotateLeft,
+  faUnlock,
+} from "@fortawesome/free-solid-svg-icons";
 import ToolCard from "@/app/_components/ToolCard";
 import { Tool } from "@/app/types/tool";
 import { useAuth } from "@/app/providers/AuthProvider";
@@ -157,40 +163,24 @@ export default function Home() {
 
   if (!user) {
     return (
-      <main className="min-h-[calc(100vh-4rem)]">
-        <div className="container-app grid min-h-[calc(100vh-4rem)] max-w-md place-items-center py-16">
-          <div className="card card-pad w-full text-center">
-            <div
-              className="mx-auto mb-5 grid h-14 w-14 place-items-center rounded-2xl text-white"
-              style={{ background: "var(--brand)" }}
-            >
-              <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
-                <path
-                  d="M12 15a3 3 0 100-6 3 3 0 000 6z"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                />
-                <path
-                  d="M4 8V6a2 2 0 012-2h12a2 2 0 012 2v2M4 8h16M4 8v10a2 2 0 002 2h12a2 2 0 002-2V8"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                />
-              </svg>
-            </div>
-            <h1 className="text-xl font-bold text-foreground">
-              工具を借りるにはログインが必要です
-            </h1>
-            <p className="mt-2 text-sm text-muted">
-              社員QRコードをかざしてログインしてください。
-            </p>
-            <button
-              onClick={() => router.push("/qr")}
-              className="btn btn-primary mt-6 w-full"
-            >
-              QRコードでログイン
-            </button>
+      <main className="container-app max-w-md py-12">
+        <div className="card p-8 text-center">
+          <div className="icon-tile mx-auto mb-4">
+            <FontAwesomeIcon icon={faQrcode} />
           </div>
+          <h1 className="text-lg font-bold">
+            工具を借りるにはログインが必要です
+          </h1>
+          <p className="page-desc">
+            社員QRコードをカメラにかざしてログインしてください。
+          </p>
+          <button
+            onClick={() => router.push("/qr")}
+            className="btn btn-primary mt-6 w-full"
+          >
+            <FontAwesomeIcon icon={faQrcode} />
+            QRコードでログイン
+          </button>
         </div>
       </main>
     );
@@ -199,27 +189,38 @@ export default function Home() {
   return (
     <main className="min-h-[calc(100vh-4rem)] pb-28">
       <div className="container-app max-w-3xl py-8">
+        <h1 className="page-title">工具を借りる</h1>
+        <p className="page-desc">
+          借りたい工具の数を選んで、画面下の「開錠する」を押してください。
+        </p>
+
         {unlockMessage && (
-          <p className="banner banner-info mb-6 text-center">{unlockMessage}</p>
+          <p className="banner banner-ok mt-6 text-center">{unlockMessage}</p>
         )}
 
         {myRentals.length > 0 && (
-          <section className="mb-10">
-            <h2 className="section-title mb-4">あなたが借りている工具</h2>
+          <section className="mt-8">
+            <h2 className="section-title mb-3">
+              あなたが借りている工具
+              <span className="count">{myRentals.length}</span>
+            </h2>
 
-            <div className="space-y-3">
+            <div className="panel">
               {myRentals.map((rental) => (
                 <div
                   key={rental.id}
-                  className="card card-pad flex items-center justify-between gap-4"
+                  className="panel-row flex items-center justify-between gap-4"
                 >
                   <div className="min-w-0">
-                    <p className="font-bold text-foreground">
+                    <p className="font-bold">
                       {rental.tool.name}
+                      <span className="text-muted ml-2 text-sm font-normal">
+                        × {rental.quantity}
+                      </span>
                     </p>
-                    <p className="mt-0.5 text-sm text-muted">
-                      数量 {rental.quantity} ・ 貸出{" "}
-                      {new Date(rental.borrowedAt).toLocaleString("ja-JP")}
+                    <p className="text-muted text-xs">
+                      {new Date(rental.borrowedAt).toLocaleString("ja-JP")}{" "}
+                      に貸出 ／ ボックス {rental.tool.boxId}
                     </p>
                   </div>
 
@@ -227,6 +228,7 @@ export default function Home() {
                     onClick={() => handleReturn(rental, rental.tool.boxId)}
                     className="btn btn-outline btn-sm flex-none"
                   >
+                    <FontAwesomeIcon icon={faRotateLeft} />
                     返却する
                   </button>
                 </div>
@@ -235,8 +237,8 @@ export default function Home() {
           </section>
         )}
 
-        <section>
-          <h2 className="section-title mb-4">工具を借りる</h2>
+        <section className="mt-8">
+          <h2 className="section-title mb-3">工具一覧</h2>
 
           <div className="space-y-3">
             {tools.map((tool) => (
@@ -250,7 +252,7 @@ export default function Home() {
             ))}
 
             {tools.length === 0 && (
-              <div className="card card-pad text-center text-muted">
+              <div className="card card-pad text-muted text-center">
                 貸出できる工具がありません。
               </div>
             )}
@@ -259,17 +261,21 @@ export default function Home() {
       </div>
 
       {/* 開錠バー（画面下に固定） */}
-      <div className="fixed inset-x-0 bottom-0 z-20 border-t border-line bg-white/95 backdrop-blur">
+      <div className="border-line fixed inset-x-0 bottom-0 z-20 border-t bg-white">
         <div className="container-app flex max-w-3xl items-center justify-between gap-4 py-3">
-          <p className="text-sm text-muted">
+          <p className="text-muted text-sm">
             選択中{" "}
-            <span className="font-bold text-foreground">{selectedCount}</span> 点
+            <span className="text-foreground text-2xl font-bold">
+              {selectedCount}
+            </span>{" "}
+            点
           </p>
           <button
             onClick={handleUnlock}
             disabled={selectedCount === 0}
             className="btn btn-primary"
           >
+            <FontAwesomeIcon icon={faUnlock} />
             開錠する
           </button>
         </div>

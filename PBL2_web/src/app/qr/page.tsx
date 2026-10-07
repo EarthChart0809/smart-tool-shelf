@@ -2,6 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faQrcode } from "@fortawesome/free-solid-svg-icons";
 
 import QRScanner from "../_components/QRScanner";
 import { useAuth } from "../providers/AuthProvider";
@@ -48,29 +50,31 @@ export default function QRPage() {
   };
 
   return (
-    <main className="min-h-[calc(100vh-4rem)]">
-      <div className="container-app max-w-md py-12">
-        <div className="text-center">
-          <h1 className="page-title">QRコードでログイン</h1>
-          <p className="mt-2 text-sm text-muted">
-            社員QRコードをカメラの枠内にかざしてください。
-          </p>
-        </div>
+    <main className="container-app max-w-md py-10 text-center">
+      <div className="icon-tile mx-auto mb-4">
+        <FontAwesomeIcon icon={faQrcode} />
+      </div>
+      <h1 className="page-title">QRコードでログイン</h1>
+      <p className="page-desc">
+        社員QRコードをカメラの枠内にかざしてください。
+      </p>
 
-        <div className="mt-8 overflow-hidden rounded-xl border border-line bg-white shadow-sm">
+      <div className="card mt-6 overflow-hidden p-1.5">
+        <div className="overflow-hidden rounded-[var(--radius-sm)]">
           <QRScanner onRead={loginUser} />
         </div>
-
-        {loading && (
-          <p className="mt-6 flex items-center justify-center gap-2 text-sm text-muted">
-            <span
-              className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-line"
-              style={{ borderTopColor: "var(--brand)" }}
-            />
-            ログインしています…
-          </p>
-        )}
       </div>
+
+      {loading ? (
+        <p className="text-muted mt-5 flex items-center justify-center gap-2 text-sm">
+          <span className="spinner" />
+          ログインしています…
+        </p>
+      ) : (
+        <p className="text-muted mt-4 text-xs">
+          カメラが起動しない場合は、ブラウザのカメラの使用を許可してください。
+        </p>
+      )}
     </main>
   );
 }
