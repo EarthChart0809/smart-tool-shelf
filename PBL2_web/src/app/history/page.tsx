@@ -79,6 +79,7 @@ export default function HistoryPage() {
           トップへ戻る
         </Link>
       </div>
+
       <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="page-title">貸出履歴</h1>
@@ -88,10 +89,12 @@ export default function HistoryPage() {
           </p>
         </div>
         {isAdmin && (
-          <CsvExportButton
-            endpoint="/api/admin/rentals/export"
-            label="貸出履歴をCSVで出力"
-          />
+          <div className="skin">
+            <CsvExportButton
+              endpoint="/api/admin/rentals/export"
+              label="貸出履歴をCSVで出力"
+            />
+          </div>
         )}
       </div>
 
@@ -111,9 +114,16 @@ export default function HistoryPage() {
           <tbody>
             {rentals.map((rental) => (
               <tr key={rental.id}>
-                <td className="font-medium">{rental.tool.name}</td>
-                <td>{rental.user.name}</td>
-                <td className="tabular-nums">{rental.quantity}</td>
+                <td className="font-bold">{rental.tool.name}</td>
+                <td>
+                  <span className="flex items-center gap-2">
+                    <span className="avatar avatar-neutral h-7 w-7 text-xs">
+                      {rental.user.name?.charAt(0) ?? "?"}
+                    </span>
+                    {rental.user.name}
+                  </span>
+                </td>
+                <td>{rental.quantity}</td>
                 <td className="text-muted">
                   {new Date(rental.borrowedAt).toLocaleString("ja-JP")}
                 </td>
@@ -125,7 +135,7 @@ export default function HistoryPage() {
                   )}
                 </td>
                 {isAdmin && (
-                  <td>
+                  <td className="text-right">
                     {!rental.returnedAt && (
                       <button
                         onClick={() =>
@@ -145,7 +155,7 @@ export default function HistoryPage() {
               <tr>
                 <td
                   colSpan={isAdmin ? 6 : 5}
-                  className="text-muted py-10 text-center"
+                  className="text-muted py-12 text-center"
                 >
                   貸出履歴がありません。
                 </td>

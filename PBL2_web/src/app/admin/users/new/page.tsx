@@ -66,16 +66,18 @@ export default function NewUserPage() {
         </div>
       </section>
 
-      <CsvUploader
-        importEndpoint="/api/admin/users/bulk"
-        exportEndpoint="/api/admin/users/export"
-        templateHeaders={["employeeId", "name"]}
-        templateFileName="社員一括登録テンプレート.csv"
-        description="1行目をヘッダー行(employeeId, name)にしてください。既に登録済みの社員番号はスキップされます。"
-        onComplete={() => {
-          alert("一括登録が完了しました。");
-        }}
-      />
+      <div className="skin">
+        <CsvUploader
+          importEndpoint="/api/admin/users/bulk"
+          exportEndpoint="/api/admin/users/export"
+          templateHeaders={["employeeId", "name"]}
+          templateFileName="社員一括登録テンプレート.csv"
+          description="1行目をヘッダー行(employeeId, name)にしてください。既に登録済みの社員番号はスキップされます。"
+          onComplete={() => {
+            alert("一括登録が完了しました。");
+          }}
+        />
+      </div>
     </main>
   );
 }

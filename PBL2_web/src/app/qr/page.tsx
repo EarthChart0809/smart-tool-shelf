@@ -3,7 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faQrcode } from "@fortawesome/free-solid-svg-icons";
+import { faArrowLeft, faQrcode } from "@fortawesome/free-solid-svg-icons";
+import Link from "next/link";
 
 import QRScanner from "../_components/QRScanner";
 import { useAuth } from "../providers/AuthProvider";
@@ -49,31 +50,56 @@ export default function QRPage() {
     router.push("/");
   };
 
-  // トップページ（ログイン前）にもこのまま埋め込んで使う
   return (
-    <section className="container-app max-w-md py-2 text-center">
-      <div className="card overflow-hidden p-1.5">
-        <div className="overflow-hidden rounded-[var(--radius-sm)]">
-          <QRScanner onRead={loginUser} />
-        </div>
+    <main className="container-app max-w-md py-8 text-center">
+      <div className="back-link mb-6 text-left">
+        <Link
+          href="/"
+          className="text-muted hover:text-foreground inline-flex items-center gap-2 text-sm"
+        >
+          <FontAwesomeIcon icon={faArrowLeft} />
+          トップへ戻る
+        </Link>
       </div>
 
-      {loading ? (
-        <p className="text-muted mt-4 flex items-center justify-center gap-2 text-sm">
-          <span className="spinner" />
-          ログインしています…
+      <div>
+        <h1 className="page-title">QRコードでログイン</h1>
+        <p className="page-desc">
+          社員QRコードをカメラの枠内にかざしてください。
         </p>
-      ) : (
-        <>
-          <p className="mt-4 flex items-center justify-center gap-2 text-sm font-bold">
-            <FontAwesomeIcon icon={faQrcode} className="text-brand" />
-            社員QRコードをカメラにかざしてください
-          </p>
-          <p className="text-muted mt-1 text-xs">
-            カメラが起動しない場合は、ブラウザのカメラの使用を許可してください。
-          </p>
-        </>
-      )}
-    </section>
+      </div>
+
+      {/* カメラ（読み取り中はスキャンラインが動く） */}
+      <div className="scanner-frame mt-7">
+        <div className="scanner-view">
+          <QRScanner onRead={loginUser} />
+          {!loading && <span className="scanner-line" />}
+        </div>
+        <p className="flex items-center justify-center gap-2 pt-2.5 pb-1 text-xs font-bold text-white/75">
+          {loading ? (
+            <>
+              <span className="spinner" />
+              ログインしています…
+            </>
+          ) : (
+            <>
+              <span className="live-dot" />
+              読み取り中
+            </>
+          )}
+        </p>
+      </div>
+
+      <p className="mt-5 flex items-center justify-center gap-2 text-sm font-bold">
+        <FontAwesomeIcon icon={faQrcode} className="text-[var(--brand)]" />
+        QRコードを枠の中央に合わせてください
+      </p>
+      <p className="text-muted mt-1 text-xs">
+        カメラが起動しない場合は、ブラウザのカメラの使用を許可してください。
+      </p>
+      <a href="/qr" className="text-link mt-4 inline-block">
+        読み取れないときは、ここを押してやり直す
+      </a>
+    </main>
   );
 }

@@ -1,5 +1,5 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faMinus, faPlus } from "@fortawesome/free-solid-svg-icons";
+import { faCheck, faMinus, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { Tool } from "@/app/types/tool";
 
 interface Props {
@@ -20,27 +20,35 @@ export default function ToolCard({
 
   return (
     <div
-      className={`card flex items-center justify-between gap-4 px-5 py-4 ${
+      className={`card relative flex flex-col gap-4 p-5 transition ${
         selected ? "card-selected" : ""
       } ${outOfStock ? "card-disabled" : ""}`}
     >
-      <div className="min-w-0">
+      {/* 選択中のチェック */}
+      {selected && (
+        <span className="absolute top-4 right-4 grid h-6 w-6 place-items-center rounded-full bg-[var(--brand)] text-[0.65rem] text-white shadow-[0_4px_10px_-2px_var(--brand-glow)]">
+          <FontAwesomeIcon icon={faCheck} />
+        </span>
+      )}
+
+      <div className="min-w-0 pr-8">
+        <p className="text-muted text-xs">ボックス {tool.boxId}</p>
         <h3
-          className={`truncate text-base font-bold ${outOfStock ? "text-muted" : ""}`}
+          className={`mt-1 truncate text-lg font-bold ${outOfStock ? "text-muted" : ""}`}
         >
           {tool.name}
         </h3>
-        <div className="mt-1 flex items-center gap-2">
+        <div className="mt-1.5">
           {outOfStock ? (
             <span className="badge badge-out">在庫なし</span>
           ) : (
             <span className="badge badge-ok">在庫 {tool.stock}</span>
           )}
-          <span className="text-muted text-xs">ボックス {tool.boxId}</span>
         </div>
       </div>
 
-      <div className="flex flex-none items-center gap-3">
+      {/* 数量ステッパー */}
+      <div className="flex items-center justify-between rounded-xl bg-[var(--surface-2)] p-1.5">
         <button
           onClick={onDecrease}
           disabled={disabled || tool.quantity <= 0}
@@ -50,7 +58,9 @@ export default function ToolCard({
           <FontAwesomeIcon icon={faMinus} />
         </button>
 
-        <span className="w-6 text-center text-lg font-bold tabular-nums">
+        <span
+          className={`text-2xl font-extrabold tabular-nums ${selected ? "text-[var(--brand)]" : "text-muted-2"}`}
+        >
           {tool.quantity}
         </span>
 

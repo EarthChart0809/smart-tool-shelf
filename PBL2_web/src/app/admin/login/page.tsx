@@ -57,15 +57,18 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <main className="container-app max-w-md py-12">
-      <div className="card p-8">
+    <main className="container-app flex min-h-[calc(100vh-3.5rem)] max-w-md items-center py-12">
+      <div className="card relative w-full overflow-hidden p-8 sm:p-10">
+        {/* 上端の赤いライン */}
+        <span className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[var(--brand-bright)] to-[var(--brand)]" />
+
         <div className="text-center">
           <Image
             src="/crescent.svg"
             alt=""
-            width={36}
-            height={36}
-            className="mx-auto mb-3"
+            width={40}
+            height={40}
+            className="mx-auto mb-4"
           />
           <h1 className="page-title">管理者ログイン</h1>
           <p className="page-desc">
@@ -73,7 +76,7 @@ export default function AdminLoginPage() {
           </p>
         </div>
 
-        <div className="mt-7 space-y-4">
+        <div className="mt-8 space-y-4">
           <div>
             <label className="label">メールアドレス</label>
             <input
@@ -99,7 +102,10 @@ export default function AdminLoginPage() {
           {error && <p className="banner banner-error">{error}</p>}
           {resetMessage && <p className="banner banner-ok">{resetMessage}</p>}
 
-          <button onClick={handleLogin} className="btn btn-primary w-full">
+          <button
+            onClick={handleLogin}
+            className="btn btn-primary btn-lg w-full"
+          >
             ログイン
           </button>
 

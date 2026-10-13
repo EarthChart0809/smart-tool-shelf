@@ -117,10 +117,12 @@ export default function AdminToolsPage() {
 
   return (
     <main className="container-app max-w-5xl py-8">
-      <h1 className="page-title">工具管理</h1>
-      <p className="page-desc">
-        工具の登録・在庫調整・交換の記録・削除ができます。
-      </p>
+      <div>
+        <h1 className="page-title">工具管理</h1>
+        <p className="page-desc">
+          工具の登録・在庫調整・交換の記録・削除ができます。
+        </p>
+      </div>
 
       {/* 新規追加フォーム */}
       <section className="panel mt-6">
@@ -165,14 +167,16 @@ export default function AdminToolsPage() {
       </section>
 
       <div className="mt-5">
-        <CsvUploader
-          importEndpoint="/api/admin/tools/bulk"
-          exportEndpoint="/api/admin/tools/export"
-          templateHeaders={["name", "stock", "boxId", "lifeLimit"]}
-          templateFileName="工具一括登録テンプレート.csv"
-          description="1行目をヘッダー行(name, stock, boxId, lifeLimit)にしてください。lifeLimitは省略可能で、未指定なら200になります。"
-          onComplete={load}
-        />
+        <div className="skin">
+          <CsvUploader
+            importEndpoint="/api/admin/tools/bulk"
+            exportEndpoint="/api/admin/tools/export"
+            templateHeaders={["name", "stock", "boxId", "lifeLimit"]}
+            templateFileName="工具一括登録テンプレート.csv"
+            description="1行目をヘッダー行(name, stock, boxId, lifeLimit)にしてください。lifeLimitは省略可能で、未指定なら200になります。"
+            onComplete={load}
+          />
+        </div>
       </div>
 
       {error && <p className="banner banner-error mb-4">{error}</p>}

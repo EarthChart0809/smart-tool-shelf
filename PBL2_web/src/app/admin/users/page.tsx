@@ -54,7 +54,9 @@ export default function UsersPage() {
           <h2 className="section-title">QRコードの一括出力</h2>
         </div>
         <div className="panel-body flex flex-wrap items-start gap-3">
-          <QrBulkDownload users={users} />
+          <div className="skin">
+            <QrBulkDownload users={users} />
+          </div>
           <Link href="/admin/users/print" className="btn btn-outline btn-sm">
             <FontAwesomeIcon icon={faPrint} />
             印刷用ページを開く
@@ -69,7 +71,13 @@ export default function UsersPage() {
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {users.map((user) => (
-          <div key={user.id} className="card card-pad text-center">
+          <div
+            key={user.id}
+            className="card card-interactive card-pad text-center"
+          >
+            <span className="avatar mx-auto mb-2 h-10 w-10">
+              {user.name?.charAt(0) ?? "?"}
+            </span>
             <p className="font-bold">{user.name}</p>
             <p className="text-muted text-xs">{user.employeeId}</p>
 

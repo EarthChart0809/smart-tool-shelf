@@ -125,14 +125,24 @@ export default function AdminDashboardPage() {
   ].sort((x, y) => new Date(y.date).getTime() - new Date(x.date).getTime());
 
   return (
-    <main className="container-app max-w-5xl py-8">
-      <h1 className="page-title">ダッシュボード</h1>
-      <p className="page-desc">
-        {today}　今日の貸出 {data.todayBorrowedCount}件／返却{" "}
-        {data.todayReturnedCount}件　登録社員 {data.employeeCount}人
-      </p>
+    <main className="container-app max-w-6xl py-8">
+      <div>
+        <h1 className="page-title">ダッシュボード</h1>
+        <p className="page-desc flex flex-wrap items-center gap-x-4 gap-y-1">
+          <span className="text-foreground font-bold">{today}</span>
+          <span>
+            今日の貸出{" "}
+            <b className="text-foreground">{data.todayBorrowedCount}</b>
+            件／返却{" "}
+            <b className="text-foreground">{data.todayReturnedCount}</b>件
+          </span>
+          <span>
+            登録社員 <b className="text-foreground">{data.employeeCount}</b>人
+          </span>
+        </p>
+      </div>
 
-      <div className="mt-6 grid grid-cols-3 gap-3">
+      <div className="mt-6 grid gap-3 sm:grid-cols-3">
         <StatCard
           icon={faToolbox}
           label="工具"
@@ -169,9 +179,14 @@ export default function AdminDashboardPage() {
             {recentActions.map(({ key, rental, type, date }) => (
               <li
                 key={key}
-                className="panel-row grid grid-cols-[6rem_1fr_auto] items-center gap-3 text-sm"
+                className="panel-row grid grid-cols-[8rem_1fr_auto] items-center gap-3 text-sm"
               >
-                <span className="truncate">{rental.user.name}</span>
+                <span className="flex min-w-0 items-center gap-2">
+                  <span className="avatar avatar-neutral h-7 w-7 text-xs">
+                    {rental.user.name?.charAt(0) ?? "?"}
+                  </span>
+                  <span className="truncate">{rental.user.name}</span>
+                </span>
                 <span className="min-w-0 truncate font-bold">
                   {rental.tool.name}
                   <span className="text-muted ml-1 font-normal">
@@ -251,18 +266,15 @@ export default function AdminDashboardPage() {
             {hourlyData ? (
               hourlyData.totalCount > 0 ? (
                 <>
-                  <div className="border-line flex h-40 items-end gap-[3px] border-b">
-                    {hourly.map(({ hour, count }) => (
+                  <div className="chart-bars">
+                    {hourly.map(({ hour, count }, i) => (
                       <div
                         key={hour}
                         title={`${hour}時台: ${count}件`}
-                        className="flex-1 rounded-t-sm"
+                        className={`chart-bar ${peak && hour === peak.hour ? "chart-bar-peak" : ""}`}
                         style={{
                           height: `${(count / maxCount) * 100}%`,
-                          background:
-                            peak && hour === peak.hour
-                              ? "var(--brand)"
-                              : "#d9d9d9",
+                          animationDelay: `${i * 18}ms`,
                         }}
                       />
                     ))}
@@ -295,7 +307,9 @@ export default function AdminDashboardPage() {
           </div>
         </section>
 
-        <AiAnalysisPanel />
+        <div className="skin">
+          <AiAnalysisPanel />
+        </div>
       </div>
     </main>
   );
@@ -315,19 +329,19 @@ function StatCard({
   tone?: "alert" | "warn";
 }) {
   return (
-    <div
-      className={`stat ${tone === "alert" ? "stat-alert" : ""} ${
-        tone === "warn" ? "stat-warn" : ""
-      }`}
-    >
-      <p className="stat-label">
+    <div className={`stat ${tone === "alert" ? "stat-alert" : ""}`}>
+      <span
+        className={`icon-tile h-12 w-12 ${tone === "alert" ? "" : "icon-tile-neutral"}`}
+      >
         <FontAwesomeIcon icon={icon} />
-        {label}
-      </p>
-      <p className="stat-value">
-        {value}
-        <span className="stat-unit">{unit}</span>
-      </p>
+      </span>
+      <div>
+        <p className="stat-label">{label}</p>
+        <p className="stat-value">
+          {value}
+          <span className="stat-unit">{unit}</span>
+        </p>
+      </div>
     </div>
   );
 }

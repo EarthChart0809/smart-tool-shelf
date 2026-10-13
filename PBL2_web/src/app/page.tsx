@@ -3,12 +3,15 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faArrowRightFromBracket,
+  faCamera,
   faClockRotateLeft,
   faQrcode,
   faRotateLeft,
+  faToolbox,
   faUnlock,
   faUserGear,
 } from "@fortawesome/free-solid-svg-icons";
@@ -170,23 +173,35 @@ export default function Home() {
     const online = tools.length > 0;
 
     return (
-      <main className="container-app max-w-md py-12 text-center sm:py-16">
-        <p className="text-muted text-xs font-bold tracking-[0.3em]">
-          SMART TOOL SHELF
-        </p>
-        <h1 className="page-title mt-2">工具を借りる・返す</h1>
+      <main className="container-app flex min-h-screen max-w-md flex-col justify-center py-12 text-center">
+        <div>
+          <p className="text-muted flex items-center justify-center gap-2 text-sm font-bold">
+            <Image src="/crescent.svg" alt="" width={18} height={18} />
+            Smart Tool Shelf
+          </p>
+          <h1 className="page-title mt-3 text-3xl sm:text-4xl">
+            工具を借りる・返す
+          </h1>
+        </div>
 
         {/* メイン: QRコードでログイン */}
         <button
           onClick={() => router.push("/qr")}
-          className="card mt-8 flex w-full flex-col items-center gap-3 px-6 py-10 transition hover:border-[var(--brand)]"
+          className="card card-interactive group mt-9 flex w-full flex-col items-center gap-4 px-6 py-10"
         >
-          <span className="icon-tile h-16 w-16 text-3xl">
+          <span className="relative grid h-24 w-24 place-items-center rounded-3xl bg-[var(--brand-soft)] text-5xl text-[var(--brand)] transition group-hover:scale-105">
             <FontAwesomeIcon icon={faQrcode} />
+            <span className="absolute -right-1 -bottom-1 grid h-9 w-9 place-items-center rounded-full border-4 border-white bg-[var(--foreground)] text-sm text-white">
+              <FontAwesomeIcon icon={faCamera} />
+            </span>
           </span>
-          <span className="text-lg font-bold">QRコードでログイン</span>
-          <span className="text-muted text-xs">
+          <span className="text-xl font-bold">QRコードでログイン</span>
+          <span className="text-muted text-sm">
             社員QRコードをカメラにかざしてください
+          </span>
+          <span className="btn btn-primary btn-lg mt-2 w-full max-w-xs">
+            <FontAwesomeIcon icon={faCamera} />
+            カメラを起動
           </span>
         </button>
 
@@ -194,14 +209,14 @@ export default function Home() {
         <div className="mt-3 grid grid-cols-2 gap-3">
           <Link
             href="/history"
-            className="card flex items-center justify-center gap-2 py-4 text-sm font-bold transition hover:border-[var(--foreground)]"
+            className="card card-interactive flex items-center justify-center gap-2.5 py-4 text-sm font-bold"
           >
             <FontAwesomeIcon icon={faClockRotateLeft} className="text-muted" />
             貸出履歴
           </Link>
           <Link
             href="/admin/login"
-            className="card text-muted flex items-center justify-center gap-2 py-4 text-sm transition hover:border-[var(--foreground)] hover:text-[var(--foreground)]"
+            className="card card-interactive text-muted flex items-center justify-center gap-2.5 py-4 text-sm"
           >
             <FontAwesomeIcon icon={faUserGear} />
             管理者
@@ -209,35 +224,33 @@ export default function Home() {
         </div>
 
         {/* システムの状態 */}
-        <p className="text-muted mt-10 flex items-center justify-center gap-2 text-xs">
+        <p className="text-muted mt-10 inline-flex items-center justify-center gap-2 self-center rounded-full border border-[var(--line)] bg-white px-3.5 py-1.5 text-xs shadow-[var(--shadow-1)]">
           <span
             className="h-2 w-2 rounded-full"
             style={{ background: online ? "var(--ok)" : "var(--muted-2)" }}
           />
-          {online ? "システム正常稼働中" : "接続を確認しています…"}
+          {online ? "サーバーに接続済み" : "サーバーに接続しています…"}
         </p>
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen pb-28">
-      <div className="container-app max-w-3xl py-8">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <h1 className="page-title">工具を借りる</h1>
-            <p className="page-desc">
-              借りたい工具の数を選んで、画面下の「開錠する」を押してください。
-            </p>
+    <main className="min-h-screen pb-36">
+      <div className="container-app max-w-4xl py-8">
+        {/* あいさつ + 操作 */}
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center gap-3.5">
+            <span className="avatar h-12 w-12 text-lg">
+              {user.name?.charAt(0) ?? "?"}
+            </span>
+            <div>
+              <p className="text-muted text-xs">ようこそ</p>
+              <p className="text-xl font-bold">{user.name} さん</p>
+            </div>
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="mr-1 flex items-center gap-2 text-sm">
-              <span className="bg-brand grid h-8 w-8 place-items-center rounded-full text-sm font-bold text-white">
-                {user.name?.charAt(0) ?? "?"}
-              </span>
-              {user.name}
-            </span>
             <Link href="/history" className="btn btn-outline btn-sm">
               <FontAwesomeIcon icon={faClockRotateLeft} />
               貸出履歴
@@ -249,8 +262,18 @@ export default function Home() {
           </div>
         </div>
 
+        <div className="mt-8">
+          <h1 className="page-title">工具を借りる</h1>
+          <p className="page-desc">
+            借りたい工具の数を選んで、画面下の「開錠する」を押してください。
+          </p>
+        </div>
+
         {unlockMessage && (
-          <p className="banner banner-ok mt-6 text-center">{unlockMessage}</p>
+          <p className="banner banner-ok mt-6 justify-center text-base font-bold">
+            <FontAwesomeIcon icon={faUnlock} />
+            {unlockMessage}
+          </p>
         )}
 
         {myRentals.length > 0 && (
@@ -266,22 +289,27 @@ export default function Home() {
                   key={rental.id}
                   className="panel-row flex items-center justify-between gap-4"
                 >
-                  <div className="min-w-0">
-                    <p className="font-bold">
-                      {rental.tool.name}
-                      <span className="text-muted ml-2 text-sm font-normal">
-                        × {rental.quantity}
-                      </span>
-                    </p>
-                    <p className="text-muted text-xs">
-                      {new Date(rental.borrowedAt).toLocaleString("ja-JP")}{" "}
-                      に貸出 ／ ボックス {rental.tool.boxId}
-                    </p>
+                  <div className="flex min-w-0 items-center gap-3.5">
+                    <span className="icon-tile icon-tile-neutral">
+                      <FontAwesomeIcon icon={faToolbox} />
+                    </span>
+                    <div className="min-w-0">
+                      <p className="truncate font-bold">
+                        {rental.tool.name}
+                        <span className="text-muted ml-2 text-sm font-normal">
+                          × {rental.quantity}
+                        </span>
+                      </p>
+                      <p className="text-muted text-xs tabular-nums">
+                        {new Date(rental.borrowedAt).toLocaleString("ja-JP")}{" "}
+                        に貸出 ／ ボックス {rental.tool.boxId}
+                      </p>
+                    </div>
                   </div>
 
                   <button
                     onClick={() => handleReturn(rental, rental.tool.boxId)}
-                    className="btn btn-outline btn-sm flex-none"
+                    className="btn btn-outline flex-none"
                   >
                     <FontAwesomeIcon icon={faRotateLeft} />
                     返却する
@@ -293,9 +321,12 @@ export default function Home() {
         )}
 
         <section className="mt-8">
-          <h2 className="section-title mb-3">工具一覧</h2>
+          <h2 className="section-title mb-3">
+            工具一覧
+            <span className="count">{tools.length}</span>
+          </h2>
 
-          <div className="space-y-3">
+          <div className="grid gap-3 sm:grid-cols-2">
             {tools.map((tool) => (
               <ToolCard
                 key={tool.id}
@@ -307,7 +338,7 @@ export default function Home() {
             ))}
 
             {tools.length === 0 && (
-              <div className="card card-pad text-muted text-center">
+              <div className="card card-pad text-muted col-span-full text-center">
                 貸出できる工具がありません。
               </div>
             )}
@@ -315,20 +346,22 @@ export default function Home() {
         </section>
       </div>
 
-      {/* 開錠バー（画面下に固定） */}
-      <div className="border-line fixed inset-x-0 bottom-0 z-20 border-t bg-white">
-        <div className="container-app flex max-w-3xl items-center justify-between gap-4 py-3">
-          <p className="text-muted text-sm">
-            選択中{" "}
-            <span className="text-foreground text-2xl font-bold">
+      {/* 開錠パネル（画面下に浮かせて固定） */}
+      <div className="fixed inset-x-0 bottom-0 z-20 px-3 pb-3 sm:px-6 sm:pb-5">
+        <div className="action-dock mx-auto flex max-w-4xl items-center justify-between gap-4 px-5 py-3">
+          <div className="flex items-baseline gap-2">
+            <span className="text-muted text-xs font-bold">選択中</span>
+            <span
+              className={`text-3xl font-extrabold tabular-nums ${selectedCount > 0 ? "text-[var(--brand)]" : "text-muted-2"}`}
+            >
               {selectedCount}
-            </span>{" "}
-            点
-          </p>
+            </span>
+            <span className="text-muted text-sm">点</span>
+          </div>
           <button
             onClick={handleUnlock}
             disabled={selectedCount === 0}
-            className="btn btn-primary"
+            className="btn btn-primary btn-lg min-w-[11rem]"
           >
             <FontAwesomeIcon icon={faUnlock} />
             開錠する
