@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEnvelope, faTrashCan } from "@fortawesome/free-solid-svg-icons";
 
 interface Admin {
   id: string;
@@ -83,62 +85,84 @@ export default function AdminAdminsPage() {
   };
 
   return (
-    <main className="mx-auto max-w-2xl p-6">
-      <h1 className="mb-6 text-3xl font-bold">管理者管理</h1>
+    <main className="container-app max-w-3xl py-8">
+      <h1 className="page-title">管理者管理</h1>
+      <p className="page-desc">
+        管理画面にログインできる管理者を招待・削除できます。
+      </p>
 
-      <div className="mb-8 space-y-3 rounded-lg border bg-white p-5 shadow">
-        <h2 className="font-bold">新しい管理者を招待</h2>
+      <section className="panel mt-6">
+        <div className="panel-head">
+          <h2 className="section-title">新しい管理者を招待</h2>
+        </div>
+        <div className="panel-body space-y-3">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div>
+              <label className="label">氏名</label>
+              <input
+                className="input"
+                placeholder="例：山田 太郎"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="label">メールアドレス</label>
+              <input
+                className="input"
+                placeholder="admin@example.com"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
+          </div>
 
-        <input
-          className="w-full rounded border p-2"
-          placeholder="氏名"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
-        <input
-          className="w-full rounded border p-2"
-          placeholder="メールアドレス"
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
+          {error && <p className="banner banner-error">{error}</p>}
+          {message && <p className="banner banner-ok">{message}</p>}
 
-        {error && <p className="text-sm text-red-600">{error}</p>}
-        {message && <p className="text-sm text-green-700">{message}</p>}
+          <button onClick={handleInvite} className="btn btn-primary">
+            <FontAwesomeIcon icon={faEnvelope} />
+            招待メールを送信
+          </button>
+        </div>
+      </section>
 
-        <button
-          onClick={handleInvite}
-          className="rounded bg-blue-700 px-4 py-2 text-white"
-        >
-          招待メールを送信
-        </button>
-      </div>
+      <section className="panel mt-5">
+        <div className="panel-head">
+          <h2 className="section-title">
+            管理者一覧
+            <span className="count">{admins.length}</span>
+          </h2>
+        </div>
 
-      <div className="space-y-2">
         {admins.map((admin) => (
           <div
             key={admin.id}
-            className="flex items-center justify-between rounded-lg border bg-white p-4 shadow"
+            className="panel-row flex items-center justify-between gap-4"
           >
-            <div>
-              <p className="font-bold">{admin.name}</p>
-              <p className="text-sm text-gray-500">{admin.email}</p>
-              {!admin.passwordSet && (
-                <p className="text-xs text-orange-600">
-                  招待中(パスワード未設定)
-                </p>
-              )}
+            <div className="min-w-0">
+              <p className="flex flex-wrap items-center gap-2 font-bold">
+                {admin.name}
+                {!admin.passwordSet && (
+                  <span className="badge badge-warn">
+                    招待中(パスワード未設定)
+                  </span>
+                )}
+              </p>
+              <p className="text-muted truncate text-xs">{admin.email}</p>
             </div>
 
             <button
               onClick={() => handleDelete(admin.id, admin.name)}
-              className="rounded bg-red-600 px-3 py-1 text-sm text-white"
+              className="btn btn-danger btn-sm flex-none"
             >
+              <FontAwesomeIcon icon={faTrashCan} />
               削除
             </button>
           </div>
         ))}
-      </div>
+      </section>
     </main>
   );
 }

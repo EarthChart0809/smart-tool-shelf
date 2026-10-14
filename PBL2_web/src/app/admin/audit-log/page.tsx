@@ -47,14 +47,19 @@ export default function AuditLogPage() {
   };
 
   return (
-    <main className="mx-auto max-w-5xl p-6">
-      <h1 className="mb-6 text-3xl font-bold">操作ログ</h1>
-
-      <div className="mb-4">
+    <main className="container-app max-w-5xl py-8">
+      <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h1 className="page-title">操作ログ</h1>
+          <p className="page-desc">
+            貸出・返却や、社員・工具・管理者に対する操作の記録です。
+          </p>
+        </div>
         <select
           value={actionFilter}
           onChange={(e) => setActionFilter(e.target.value)}
-          className="rounded border p-2 text-sm"
+          className="select"
+          aria-label="操作の種類で絞り込む"
         >
           <option value="">すべての操作</option>
           {Object.entries(ACTION_LABELS).map(([key, label]) => (
@@ -65,35 +70,35 @@ export default function AuditLogPage() {
         </select>
       </div>
 
-      <div className="overflow-hidden rounded-lg border bg-white shadow">
-        <table className="w-full text-left text-sm">
-          <thead className="bg-gray-200">
+      <div className="table-wrap">
+        <table className="table-app">
+          <thead>
             <tr>
-              <th className="p-3">日時</th>
-              <th className="p-3">実行者</th>
-              <th className="p-3">操作</th>
-              <th className="p-3">詳細</th>
+              <th>日時</th>
+              <th>実行者</th>
+              <th>操作</th>
+              <th>詳細</th>
             </tr>
           </thead>
 
           <tbody>
             {logs.map((log) => (
-              <tr key={log.id} className="border-t">
-                <td className="p-3 whitespace-nowrap">
+              <tr key={log.id}>
+                <td className="text-muted whitespace-nowrap tabular-nums">
                   {new Date(log.createdAt).toLocaleString("ja-JP")}
                 </td>
-                <td className="p-3">
-                  {log.actorName}
-                  <span className="ml-1 text-xs text-gray-400">
-                    ({log.actorType === "ADMIN" ? "管理者" : "社員"})
+                <td className="whitespace-nowrap">
+                  <span className="font-bold">{log.actorName}</span>
+                  <span className="badge badge-muted ml-2">
+                    {log.actorType === "ADMIN" ? "管理者" : "社員"}
                   </span>
                 </td>
-                <td className="p-3">
+                <td className="whitespace-nowrap">
                   {ACTION_LABELS[log.action] ?? log.action}
                 </td>
-                <td className="p-3 text-xs text-gray-500">
+                <td className="text-muted text-xs">
                   {log.detail && (
-                    <pre className="whitespace-pre-wrap">
+                    <pre className="font-sans whitespace-pre-wrap">
                       {JSON.stringify(JSON.parse(log.detail), null, 0)}
                     </pre>
                   )}
@@ -103,7 +108,7 @@ export default function AuditLogPage() {
 
             {logs.length === 0 && (
               <tr>
-                <td colSpan={4} className="p-6 text-center text-gray-500">
+                <td colSpan={4} className="text-muted py-10 text-center">
                   ログがありません。
                 </td>
               </tr>

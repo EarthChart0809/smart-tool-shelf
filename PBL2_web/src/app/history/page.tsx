@@ -3,6 +3,9 @@
 import { unlockBoxesViaLan } from "@/lib/esp32-client";
 import { useEffect, useState } from "react";
 import CsvExportButton from "@/app/admin/_components/CsvExportButton";
+import Link from "next/link";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 
 interface RentalWithRelations {
   id: number;
@@ -65,80 +68,101 @@ export default function HistoryPage() {
   };
 
   return (
-    <main className="min-h-[calc(100vh-4rem)]">
-      <div className="container-app max-w-4xl py-8">
-        <h1 className="page-title">貸出履歴</h1>
-        <p className="text-muted mt-2 mb-6 text-sm">
-          返却操作は、社員本人がQRコードでログインした画面から行ってください。
-          {isAdmin && "（管理者としてログイン中のため、代理返却も可能です）"}
-        </p>
+    <main className="container-app max-w-5xl py-8">
+      {/* back-link: 管理画面内で開いたときは globals.css で隠す（サイドバーがあるため） */}
+      <div className="back-link mb-6">
+        <Link
+          href="/"
+          className="text-muted hover:text-foreground inline-flex items-center gap-2 text-sm"
+        >
+          <FontAwesomeIcon icon={faArrowLeft} />
+          トップへ戻る
+        </Link>
+      </div>
 
+      <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h1 className="page-title">貸出履歴</h1>
+          <p className="page-desc">
+            返却操作は、社員本人がQRコードでログインした画面から行ってください。
+            {isAdmin && "（管理者としてログイン中のため、代理返却も可能です）"}
+          </p>
+        </div>
         {isAdmin && (
-          <CsvExportButton
-            endpoint="/api/admin/rentals/export"
-            label="貸出履歴をCSVで出力"
-          />
+          <div className="skin">
+            <CsvExportButton
+              endpoint="/api/admin/rentals/export"
+              label="貸出履歴をCSVで出力"
+            />
+          </div>
         )}
+      </div>
 
-        <div className="table-wrap">
-          <table className="table-app">
-            <thead>
-              <tr>
-                <th>工具</th>
-                <th>借りた人</th>
-                <th>数量</th>
-                <th>貸出日時</th>
-                <th>状態</th>
-                {isAdmin && <th></th>}
-              </tr>
-            </thead>
+      <div className="table-wrap">
+        <table className="table-app">
+          <thead>
+            <tr>
+              <th>工具</th>
+              <th>借りた人</th>
+              <th>数量</th>
+              <th>貸出日時</th>
+              <th>状態</th>
+              {isAdmin && <th></th>}
+            </tr>
+          </thead>
 
-            <tbody>
-              {rentals.map((rental) => (
-                <tr key={rental.id}>
-                  <td className="font-medium">{rental.tool.name}</td>
-                  <td>{rental.user.name}</td>
-                  <td className="tabular-nums">{rental.quantity}</td>
-                  <td className="text-muted">
-                    {new Date(rental.borrowedAt).toLocaleString("ja-JP")}
-                  </td>
-                  <td>
-                    {rental.returnedAt ? (
-                      <span className="badge badge-muted">返却済み</span>
-                    ) : (
-                      <span className="badge badge-out">貸出中</span>
+          <tbody>
+            {rentals.map((rental) => (
+              <tr key={rental.id}>
+                <td className="font-bold">{rental.tool.name}</td>
+                <td>
+                  <span className="flex items-center gap-2">
+                    <span className="avatar avatar-neutral h-7 w-7 text-xs">
+                      {rental.user.name?.charAt(0) ?? "?"}
+                    </span>
+                    {rental.user.name}
+                  </span>
+                </td>
+                <td>{rental.quantity}</td>
+                <td className="text-muted">
+                  {new Date(rental.borrowedAt).toLocaleString("ja-JP")}
+                </td>
+                <td>
+                  {rental.returnedAt ? (
+                    <span className="badge badge-muted">返却済み</span>
+                  ) : (
+                    <span className="badge badge-out">貸出中</span>
+                  )}
+                </td>
+                {isAdmin && (
+                  <td className="text-right">
+                    {!rental.returnedAt && (
+                      <button
+                        onClick={() =>
+                          handleAdminReturn(rental.id, rental.tool.boxId)
+                        }
+                        className="btn btn-outline btn-sm"
+                      >
+                        代理返却
+                      </button>
                     )}
                   </td>
-                  {isAdmin && (
-                    <td>
-                      {!rental.returnedAt && (
-                        <button
-                          onClick={() =>
-                            handleAdminReturn(rental.id, rental.tool.boxId)
-                          }
-                          className="btn btn-outline btn-sm"
-                        >
-                          代理返却
-                        </button>
-                      )}
-                    </td>
-                  )}
-                </tr>
-              ))}
+                )}
+              </tr>
+            ))}
 
-              {rentals.length === 0 && (
-                <tr>
-                  <td
-                    colSpan={isAdmin ? 6 : 5}
-                    className="text-muted py-10 text-center"
-                  >
-                    貸出履歴がありません。
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+            {rentals.length === 0 && (
+              <tr>
+                <td
+                  colSpan={isAdmin ? 6 : 5}
+                  className="text-muted py-12 text-center"
+                >
+                  貸出履歴がありません。
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </div>
     </main>
   );

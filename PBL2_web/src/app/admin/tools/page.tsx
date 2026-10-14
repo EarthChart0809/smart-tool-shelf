@@ -1,7 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import LifeGauge from "@/app/admin/_components/LifeGauge";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faPlus,
+  faRotate,
+  faTrashCan,
+} from "@fortawesome/free-solid-svg-icons";
 import CsvUploader from "@/app/admin/_components/CsvUploader";
 
 interface Tool {
@@ -111,26 +116,21 @@ export default function AdminToolsPage() {
   };
 
   return (
-    <main className="container-app max-w-3xl py-8">
-      <h1 className="page-title">工具管理</h1>
-      <p className="text-muted mt-2 mb-6 text-sm">
-        工具の登録・在庫調整・削除ができます。
-      </p>
-
-      <CsvUploader
-  importEndpoint="/api/admin/tools/bulk"
-  exportEndpoint="/api/admin/tools/export"
-  templateHeaders={["name", "stock", "boxId", "lifeLimit"]}
-  templateFileName="工具一括登録テンプレート.csv"
-  description="1行目をヘッダー行(name, stock, boxId, lifeLimit)にしてください。lifeLimitは省略可能で、未指定なら200になります。"
-  onComplete={load}
-/>
+    <main className="container-app max-w-5xl py-8">
+      <div>
+        <h1 className="page-title">工具管理</h1>
+        <p className="page-desc">
+          工具の登録・在庫調整・交換の記録・削除ができます。
+        </p>
+      </div>
 
       {/* 新規追加フォーム */}
-      <div className="card card-pad mb-8">
-        <h2 className="section-title mb-4">工具を追加</h2>
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
-          <div className="flex-1">
+      <section className="panel mt-6">
+        <div className="panel-head">
+          <h2 className="section-title">工具を追加</h2>
+        </div>
+        <div className="panel-body grid gap-3 sm:grid-cols-[1fr_6rem_6rem_auto] sm:items-end">
+          <div>
             <label className="label">工具名</label>
             <input
               className="input"
@@ -139,7 +139,7 @@ export default function AdminToolsPage() {
               onChange={(e) => setName(e.target.value)}
             />
           </div>
-          <div className="w-full sm:w-24">
+          <div>
             <label className="label">在庫数</label>
             <input
               className="input"
@@ -149,7 +149,7 @@ export default function AdminToolsPage() {
               onChange={(e) => setStock(e.target.value)}
             />
           </div>
-          <div className="w-full sm:w-28">
+          <div>
             <label className="label">ボックスID</label>
             <input
               className="input"
@@ -159,51 +159,66 @@ export default function AdminToolsPage() {
               onChange={(e) => setBoxId(e.target.value)}
             />
           </div>
-          <button onClick={handleAdd} className="btn btn-primary sm:flex-none">
+          <button onClick={handleAdd} className="btn btn-primary">
+            <FontAwesomeIcon icon={faPlus} />
             追加
           </button>
         </div>
+      </section>
+
+      <div className="mt-5">
+        <div className="skin">
+          <CsvUploader
+            importEndpoint="/api/admin/tools/bulk"
+            exportEndpoint="/api/admin/tools/export"
+            templateHeaders={["name", "stock", "boxId", "lifeLimit"]}
+            templateFileName="工具一括登録テンプレート.csv"
+            description="1行目をヘッダー行(name, stock, boxId, lifeLimit)にしてください。lifeLimitは省略可能で、未指定なら200になります。"
+            onComplete={load}
+          />
+        </div>
       </div>
 
-      {error && (
-        <p
-          className="banner banner-info mb-4 text-sm"
-          style={{ fontWeight: 500 }}
-        >
-          {error}
-        </p>
-      )}
+      {error && <p className="banner banner-error mb-4">{error}</p>}
 
       {/* 工具リスト */}
-      <div className="space-y-3">
+      <section className="panel">
+        <div className="panel-head">
+          <h2 className="section-title">
+            登録済みの工具
+            <span className="count">{tools.length}</span>
+          </h2>
+        </div>
+
         {tools.map((tool) => (
           <div
             key={tool.id}
-            className="card card-pad flex items-center justify-between gap-4"
+            className="panel-row flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between"
           >
-            <div className="min-w-0">
-              <p className="text-foreground font-bold">{tool.name}</p>
-              <p className="text-muted mt-0.5 text-sm">
-                ボックスID {tool.boxId}
-              </p>
+            <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center sm:gap-8">
+              <div className="min-w-0 sm:w-40">
+                <p className="truncate font-bold">{tool.name}</p>
+                <p className="text-muted text-xs">ボックス {tool.boxId}</p>
+              </div>
+              <LifeMeter useCount={tool.useCount} lifeLimit={tool.lifeLimit} />
             </div>
 
-            <div className="flex flex-none items-center gap-3">
+            <div className="flex flex-wrap items-center gap-2">
               <label className="text-muted text-sm">在庫</label>
               <input
                 type="number"
                 defaultValue={tool.stock}
-                className="input w-20 text-center"
+                className="input input-sm w-16 text-center"
                 onBlur={(e) =>
                   handleStockChange(tool.id, Number(e.target.value))
                 }
               />
 
-              <label className="text-sm text-gray-500">交換推奨:</label>
+              <label className="text-muted ml-2 text-sm">交換目安</label>
               <input
                 type="number"
                 defaultValue={tool.lifeLimit}
-                className="w-16 rounded border p-1 text-center"
+                className="input input-sm w-20 text-center"
                 onBlur={(e) =>
                   handleLifeLimitChange(tool.id, Number(e.target.value))
                 }
@@ -211,8 +226,9 @@ export default function AdminToolsPage() {
 
               <button
                 onClick={() => handleReplace(tool.id, tool.name)}
-                className="rounded bg-green-600 px-3 py-1 text-sm text-white"
+                className="btn btn-outline btn-sm ml-2"
               >
+                <FontAwesomeIcon icon={faRotate} />
                 交換した
               </button>
 
@@ -220,6 +236,7 @@ export default function AdminToolsPage() {
                 onClick={() => handleDelete(tool.id)}
                 className="btn btn-danger btn-sm"
               >
+                <FontAwesomeIcon icon={faTrashCan} />
                 削除
               </button>
             </div>
@@ -227,11 +244,51 @@ export default function AdminToolsPage() {
         ))}
 
         {tools.length === 0 && (
-          <div className="card card-pad text-muted text-center">
+          <p className="panel-body text-muted text-center text-sm">
             工具が登録されていません。
-          </div>
+          </p>
         )}
-      </div>
+      </section>
     </main>
+  );
+}
+
+function lifeColor(useCount: number, lifeLimit: number) {
+  const percent = (useCount / lifeLimit) * 100;
+  return percent >= 90
+    ? "var(--brand)"
+    : percent >= 70
+      ? "var(--warn)"
+      : "var(--ok)";
+}
+
+function LifeMeter({
+  useCount,
+  lifeLimit,
+}: {
+  useCount: number;
+  lifeLimit: number;
+}) {
+  const percent = Math.min((useCount / lifeLimit) * 100, 100);
+  const remaining = Math.max(lifeLimit - useCount, 0);
+  const color = lifeColor(useCount, lifeLimit);
+
+  return (
+    <div className="w-full sm:w-44">
+      <div className="text-muted mb-1 flex justify-between text-xs">
+        <span>
+          {useCount} / {lifeLimit} 回
+        </span>
+        <span style={percent >= 90 ? { color } : undefined}>
+          {percent >= 100 ? "交換推奨" : `残り${remaining}回`}
+        </span>
+      </div>
+      <div className="meter">
+        <div
+          className="meter-fill"
+          style={{ width: `${percent}%`, background: color }}
+        />
+      </div>
+    </div>
   );
 }

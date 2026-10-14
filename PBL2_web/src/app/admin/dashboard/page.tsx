@@ -1,7 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import HourlyChart from "@/app/admin/_components/HourlyChart";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faHandHolding,
+  faToolbox,
+  faTriangleExclamation,
+  type IconDefinition,
+} from "@fortawesome/free-solid-svg-icons";
 import AiAnalysisPanel from "@/app/admin/_components/AiAnalysisPanel";
 
 interface RentalSummary {
@@ -72,123 +78,238 @@ export default function AdminDashboardPage() {
   };
 
   if (error) {
-    return <p className="p-6 text-red-600">{error}</p>;
+    return (
+      <main className="container-app max-w-5xl py-8">
+        <p className="banner banner-error">{error}</p>
+      </main>
+    );
   }
 
   if (!data) {
-    return <p className="p-6 text-gray-500">読み込み中...</p>;
+    return (
+      <p className="text-muted flex items-center justify-center gap-2 py-24 text-sm">
+        <span className="spinner" />
+        読み込み中...
+      </p>
+    );
   }
 
-  return (
-    <main className="mx-auto max-w-5xl p-6">
-      <h1 className="mb-6 text-3xl font-bold">管理ダッシュボード</h1>
+  const today = new Date().toLocaleDateString("ja-JP", {
+    month: "long",
+    day: "numeric",
+    weekday: "short",
+  });
 
-      <div className="mb-8 grid grid-cols-2 gap-4 md:grid-cols-4">
+  // 時間帯別グラフ: いちばん多い時間帯を赤で強調する
+  const hourly = hourlyData?.hourly ?? [];
+  const maxCount = Math.max(...hourly.map((h) => h.count), 0);
+  const peak = hourly.find((h) => h.count === maxCount && maxCount > 0);
+
+  // 要確認 = 在庫不足 + 交換間近
+  const attentionCount = data.lowStockTools.length + data.criticalTools.length;
+
+  // 最近の操作: 貸出と返却を1つのリストにまとめて新しい順に並べる
+  const recentActions = [
+    ...data.recentBorrows.map((rental) => ({
+      key: `b-${rental.id}`,
+      rental,
+      type: "貸出" as const,
+      date: rental.borrowedAt,
+    })),
+    ...data.recentReturns.map((rental) => ({
+      key: `r-${rental.id}`,
+      rental,
+      type: "返却" as const,
+      date: rental.returnedAt ?? rental.borrowedAt,
+    })),
+  ].sort((x, y) => new Date(y.date).getTime() - new Date(x.date).getTime());
+
+  return (
+    <main className="container-app max-w-6xl py-8">
+      <div>
+        <h1 className="page-title">ダッシュボード</h1>
+        <p className="page-desc flex flex-wrap items-center gap-x-4 gap-y-1">
+          <span className="text-foreground font-bold">{today}</span>
+          <span>
+            今日の貸出{" "}
+            <b className="text-foreground">{data.todayBorrowedCount}</b>
+            件／返却{" "}
+            <b className="text-foreground">{data.todayReturnedCount}</b>件
+          </span>
+          <span>
+            登録社員 <b className="text-foreground">{data.employeeCount}</b>人
+          </span>
+        </p>
+      </div>
+
+      <div className="mt-6 grid gap-3 sm:grid-cols-3">
         <StatCard
-          icon="📦"
-          label="今日の貸出"
-          value={`${data.todayBorrowedCount}件`}
+          icon={faToolbox}
+          label="工具"
+          value={data.toolCount}
+          unit="種類"
         />
         <StatCard
-          icon="🔄"
-          label="今日の返却"
-          value={`${data.todayReturnedCount}件`}
+          icon={faHandHolding}
+          label="貸出"
+          value={data.currentlyBorrowedCount}
+          unit="個"
         />
         <StatCard
-          icon="🧰"
-          label="現在貸出中"
-          value={`${data.currentlyBorrowedCount}個`}
-        />
-        <StatCard
-          icon="⚠"
-          label="在庫不足"
-          value={`${data.lowStockTools.length}種類`}
-          alert={data.lowStockTools.length > 0}
-        />
-        <StatCard
-          icon="👤"
-          label="登録社員数"
-          value={`${data.employeeCount}人`}
-        />
-        <StatCard
-          icon="🔧"
-          label="登録工具数"
-          value={`${data.toolCount}種類`}
-        />
-        <StatCard
-          icon="🛠"
-          label="要交換間近"
-          value={`${data.criticalTools.length}種類`}
-          alert={data.criticalTools.length > 0}
+          icon={faTriangleExclamation}
+          label="要確認"
+          value={attentionCount}
+          unit="件"
+          tone={attentionCount > 0 ? "alert" : undefined}
         />
       </div>
 
-      {data.lowStockTools.length > 0 && (
-        <section className="mb-8 rounded-lg border border-red-300 bg-red-50 p-4">
-          <h2 className="mb-2 font-bold text-red-700">⚠ 在庫不足の工具</h2>
-          <ul className="space-y-1 text-sm">
-            {data.lowStockTools.map((tool) => (
-              <li key={tool.id}>
-                {tool.name} — 残り{tool.stock}個
+      <div className="mt-5 grid items-start gap-5 lg:grid-cols-[3fr_2fr]">
+        {/* 最近の操作 */}
+        <section className="panel">
+          <div className="panel-head">
+            <h2 className="section-title">最近の操作</h2>
+          </div>
+
+          {recentActions.length === 0 && (
+            <p className="panel-body text-muted text-sm">履歴がありません。</p>
+          )}
+
+          <ul>
+            {recentActions.map(({ key, rental, type, date }) => (
+              <li
+                key={key}
+                className="panel-row grid grid-cols-[8rem_1fr_auto] items-center gap-3 text-sm"
+              >
+                <span className="flex min-w-0 items-center gap-2">
+                  <span className="avatar avatar-neutral h-7 w-7 text-xs">
+                    {rental.user.name?.charAt(0) ?? "?"}
+                  </span>
+                  <span className="truncate">{rental.user.name}</span>
+                </span>
+                <span className="min-w-0 truncate font-bold">
+                  {rental.tool.name}
+                  <span className="text-muted ml-1 font-normal">
+                    × {rental.quantity}
+                  </span>
+                </span>
+                <span className="flex items-center gap-3">
+                  <span className="text-muted hidden text-xs tabular-nums sm:inline">
+                    {new Date(date).toLocaleString("ja-JP")}
+                  </span>
+                  <span
+                    className={`badge ${type === "貸出" ? "badge-out" : "badge-muted"}`}
+                  >
+                    {type}
+                  </span>
+                </span>
               </li>
             ))}
           </ul>
         </section>
-      )}
 
-      {data.criticalTools.length > 0 && (
-        <section className="mb-8 rounded-lg border border-amber-300 bg-amber-50 p-4">
-          <h2 className="mb-2 font-bold text-amber-700">🛠 要交換間近の工具</h2>
-          <ul className="space-y-1 text-sm">
-            {data.criticalTools.map((tool) => (
-              <li key={tool.id}>
-                {tool.name} — 使用 {tool.useCount}/{tool.lifeLimit}
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
+        {/* 要確認の内訳 */}
+        <section className="panel">
+          <div className="panel-head">
+            <h2 className="section-title">
+              要確認
+              <span className="count">{attentionCount}</span>
+            </h2>
+          </div>
 
-      <section className="mb-8 rounded-lg border bg-white p-5 shadow">
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-xl font-bold">時間帯別の貸出傾向</h2>
-
-          <select
-            value={days}
-            onChange={(e) => setDays(e.target.value)}
-            className="rounded border p-1 text-sm"
-          >
-            <option value="all">全期間</option>
-            <option value="7">直近7日</option>
-            <option value="30">直近30日</option>
-          </select>
-        </div>
-
-        {hourlyData ? (
-          hourlyData.totalCount > 0 ? (
-            <HourlyChart hourly={hourlyData.hourly} />
-          ) : (
-            <p className="text-sm text-gray-500">
-              該当期間のデータがありません。
+          {attentionCount === 0 && (
+            <p className="panel-body text-muted text-sm">
+              対応が必要な工具はありません。
             </p>
-          )
-        ) : (
-          <p className="text-sm text-gray-500">読み込み中...</p>
-        )}
-      </section>
+          )}
 
-      <AiAnalysisPanel />
+          {data.lowStockTools.map((tool) => (
+            <div
+              key={`stock-${tool.id}`}
+              className="panel-row flex items-center justify-between gap-3"
+            >
+              <div className="min-w-0">
+                <p className="truncate text-sm font-bold">{tool.name}</p>
+                <p className="text-muted text-xs">残り {tool.stock} 個</p>
+              </div>
+              <span className="badge badge-out">在庫不足</span>
+            </div>
+          ))}
+          {data.criticalTools.map((tool) => (
+            <div key={`life-${tool.id}`} className="panel-row space-y-2">
+              <div className="flex items-center justify-between gap-3">
+                <p className="truncate text-sm font-bold">{tool.name}</p>
+                <span className="badge badge-warn">交換間近</span>
+              </div>
+              <LifeMeter useCount={tool.useCount} lifeLimit={tool.lifeLimit} />
+            </div>
+          ))}
+        </section>
+      </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        <section>
-          <h2 className="mb-3 text-xl font-bold">最近の貸出履歴</h2>
-          <RentalList rentals={data.recentBorrows} dateField="borrowedAt" />
+      <div className="mt-5 grid items-start gap-5 lg:grid-cols-2">
+        <section className="panel">
+          <div className="panel-head">
+            <h2 className="section-title">時間帯別の貸出傾向</h2>
+            <select
+              value={days}
+              onChange={(e) => setDays(e.target.value)}
+              className="select"
+            >
+              <option value="all">全期間</option>
+              <option value="7">直近7日</option>
+              <option value="30">直近30日</option>
+            </select>
+          </div>
+
+          <div className="panel-body">
+            {hourlyData ? (
+              hourlyData.totalCount > 0 ? (
+                <>
+                  <div className="chart-bars">
+                    {hourly.map(({ hour, count }, i) => (
+                      <div
+                        key={hour}
+                        title={`${hour}時台: ${count}件`}
+                        className={`chart-bar ${peak && hour === peak.hour ? "chart-bar-peak" : ""}`}
+                        style={{
+                          height: `${(count / maxCount) * 100}%`,
+                          animationDelay: `${i * 18}ms`,
+                        }}
+                      />
+                    ))}
+                  </div>
+                  <div className="text-muted-2 mt-1 flex text-[0.65rem]">
+                    {hourly.map(({ hour }) => (
+                      <span key={hour} className="flex-1 text-center">
+                        {hour % 3 === 0 ? hour : ""}
+                      </span>
+                    ))}
+                  </div>
+                  {peak && (
+                    <p className="text-muted mt-3 text-xs">
+                      一番多いのは{" "}
+                      <span className="text-foreground font-bold">
+                        {peak.hour}時台
+                      </span>
+                      （{peak.count}件）です。
+                    </p>
+                  )}
+                </>
+              ) : (
+                <p className="text-muted text-sm">
+                  該当期間のデータがありません。
+                </p>
+              )
+            ) : (
+              <p className="text-muted text-sm">読み込み中...</p>
+            )}
+          </div>
         </section>
 
-        <section>
-          <h2 className="mb-3 text-xl font-bold">最近の返却履歴</h2>
-          <RentalList rentals={data.recentReturns} dateField="returnedAt" />
-        </section>
+        <div className="skin">
+          <AiAnalysisPanel />
+        </div>
       </div>
     </main>
   );
@@ -198,57 +319,69 @@ function StatCard({
   icon,
   label,
   value,
-  alert = false,
+  unit,
+  tone,
 }: {
-  icon: string;
+  icon: IconDefinition;
   label: string;
-  value: string;
-  alert?: boolean;
+  value: number;
+  unit: string;
+  tone?: "alert" | "warn";
 }) {
   return (
-    <div
-      className={`rounded-lg border p-4 text-center shadow ${
-        alert ? "border-red-300 bg-red-50" : "bg-white"
-      }`}
-    >
-      <div className="text-2xl">{icon}</div>
-      <div className="mt-1 text-sm text-gray-500">{label}</div>
-      <div className="text-2xl font-bold">{value}</div>
+    <div className={`stat ${tone === "alert" ? "stat-alert" : ""}`}>
+      <span
+        className={`icon-tile h-12 w-12 ${tone === "alert" ? "" : "icon-tile-neutral"}`}
+      >
+        <FontAwesomeIcon icon={icon} />
+      </span>
+      <div>
+        <p className="stat-label">{label}</p>
+        <p className="stat-value">
+          {value}
+          <span className="stat-unit">{unit}</span>
+        </p>
+      </div>
     </div>
   );
 }
 
-function RentalList({
-  rentals,
-  dateField,
+function lifeColor(useCount: number, lifeLimit: number) {
+  const percent = (useCount / lifeLimit) * 100;
+  return percent >= 90
+    ? "var(--brand)"
+    : percent >= 70
+      ? "var(--warn)"
+      : "var(--ok)";
+}
+
+function LifeMeter({
+  useCount,
+  lifeLimit,
 }: {
-  rentals: RentalSummary[];
-  dateField: "borrowedAt" | "returnedAt";
+  useCount: number;
+  lifeLimit: number;
 }) {
-  if (rentals.length === 0) {
-    return <p className="text-sm text-gray-500">履歴がありません。</p>;
-  }
+  const percent = Math.min((useCount / lifeLimit) * 100, 100);
+  const remaining = Math.max(lifeLimit - useCount, 0);
+  const color = lifeColor(useCount, lifeLimit);
 
   return (
-    <ul className="space-y-2">
-      {rentals.map((rental) => {
-        const date = rental[dateField];
-        return (
-          <li
-            key={rental.id}
-            className="rounded-lg border bg-white p-3 text-sm shadow"
-          >
-            <span className="font-bold">{rental.tool.name}</span>
-            <span className="text-gray-500">
-              {" "}
-              × {rental.quantity} — {rental.user.name}
-            </span>
-            <div className="text-xs text-gray-400">
-              {date ? new Date(date).toLocaleString("ja-JP") : ""}
-            </div>
-          </li>
-        );
-      })}
-    </ul>
+    <div className="w-full sm:w-44">
+      <div className="text-muted mb-1 flex justify-between text-xs">
+        <span>
+          {useCount} / {lifeLimit} 回
+        </span>
+        <span style={percent >= 90 ? { color } : undefined}>
+          {percent >= 100 ? "交換推奨" : `残り${remaining}回`}
+        </span>
+      </div>
+      <div className="meter">
+        <div
+          className="meter-fill"
+          style={{ width: `${percent}%`, background: color }}
+        />
+      </div>
+    </div>
   );
 }
