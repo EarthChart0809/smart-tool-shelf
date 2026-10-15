@@ -169,16 +169,17 @@ export default function Home() {
   const selectedCount = tools.reduce((sum, t) => sum + t.quantity, 0);
 
   if (!user) {
-    // 工具一覧が取得できていればサーバーと通信できている
-    const online = tools.length > 0;
-
     return (
       <main className="container-app flex min-h-screen max-w-md flex-col justify-center py-12 text-center">
         <div>
-          <p className="text-muted flex items-center justify-center gap-2 text-sm font-bold">
-            <Image src="/crescent.svg" alt="" width={18} height={18} />
-            Smart Tool Shelf
-          </p>
+          <Image
+            src="/logo-on-light.png"
+            alt="Smart Tool Shelf"
+            width={236}
+            height={40}
+            className="mx-auto"
+            priority
+          />
           <h1 className="page-title mt-3 text-3xl sm:text-4xl">
             工具を借りる・返す
           </h1>
@@ -223,14 +224,6 @@ export default function Home() {
           </Link>
         </div>
 
-        {/* システムの状態 */}
-        <p className="text-muted mt-10 inline-flex items-center justify-center gap-2 self-center rounded-full border border-[var(--line)] bg-white px-3.5 py-1.5 text-xs shadow-[var(--shadow-1)]">
-          <span
-            className="h-2 w-2 rounded-full"
-            style={{ background: online ? "var(--ok)" : "var(--muted-2)" }}
-          />
-          {online ? "サーバーに接続済み" : "サーバーに接続しています…"}
-        </p>
       </main>
     );
   }

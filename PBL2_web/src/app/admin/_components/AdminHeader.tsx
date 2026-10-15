@@ -15,10 +15,12 @@ export default async function AdminHeader() {
       <header className="admin-topbar text-white print:hidden">
         <div className="container-app flex h-14 max-w-5xl items-center justify-between gap-4">
           <div className="flex items-center gap-2.5">
-            <Image src="/crescent.svg" alt="" width={24} height={24} />
-            <span className="hidden text-sm font-bold sm:inline">
-              Smart Tool Shelf
-            </span>
+            <Image
+              src="/logo-on-dark.png"
+              alt="Smart Tool Shelf"
+              width={165}
+              height={28}
+            />
             <span className="rounded-full bg-white/10 px-2 py-0.5 text-[0.65rem] font-bold">
               管理画面
             </span>
@@ -37,12 +39,14 @@ export default async function AdminHeader() {
     <aside className="admin-sidebar text-white print:hidden">
       <div className="flex items-center justify-between gap-3 px-5 py-4 md:block md:px-6 md:pt-7 md:pb-6">
         <Link href="/admin/dashboard" className="flex items-center gap-3">
-          <Image src="/crescent.svg" alt="" width={30} height={30} />
           <span>
-            <span className="block text-sm leading-tight font-bold">
-              Smart Tool Shelf
-            </span>
-            <span className="mt-0.5 hidden text-xs text-white/50 md:block">
+            <Image
+              src="/logo-on-dark.png"
+              alt="Smart Tool Shelf"
+              width={188}
+              height={32}
+            />
+            <span className="mt-1 hidden text-xs text-white/50 md:block">
               管理画面
             </span>
           </span>

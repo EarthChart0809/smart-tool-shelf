@@ -64,10 +64,10 @@ export default function AdminLoginPage() {
 
         <div className="text-center">
           <Image
-            src="/crescent.svg"
+            src="/icon-on-light.png"
             alt=""
-            width={40}
-            height={40}
+            width={56}
+            height={56}
             className="mx-auto mb-4"
           />
           <h1 className="page-title">管理者ログイン</h1>
