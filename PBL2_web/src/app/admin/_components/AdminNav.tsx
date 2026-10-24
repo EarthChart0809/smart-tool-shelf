@@ -27,6 +27,7 @@ const NAV_ITEMS = [
   { href: "/admin/audit-log", label: "操作ログ", icon: faClipboardList },
   { href: "/admin/admins", label: "管理者", icon: faUserShield },
   { href: "/admin/profile", label: "設定", icon: faGear },
+  { href: "/admin/shelf", label: "工具棚", icon: faToolbox },
 ];
 
 export default function AdminNav() {
