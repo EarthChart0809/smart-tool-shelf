@@ -13,16 +13,18 @@ const ShelfCanvas = dynamic(() => import("./ShelfCanvas"), {
 
 interface Props {
   className?: string;
+  drawerStates?: Record<number, boolean>;
 }
 
-export default function ShelfViewer({ className }: Props) {
+export default function ShelfViewer({ className, drawerStates }: Props) {
   return (
     <div
       className={
-        className ?? "h-[420px] w-full overflow-hidden rounded-lg border bg-gray-100"
+        className ??
+        "h-[420px] w-full overflow-hidden rounded-lg border bg-gray-100"
       }
     >
-      <ShelfCanvas />
+      <ShelfCanvas drawerStates={drawerStates} />
     </div>
   );
 }

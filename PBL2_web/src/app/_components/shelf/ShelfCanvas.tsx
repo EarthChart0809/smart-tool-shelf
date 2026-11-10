@@ -5,7 +5,11 @@ import { Canvas } from "@react-three/fiber";
 import { Bounds, OrbitControls } from "@react-three/drei";
 import ShelfModel from "./ShelfModel";
 
-export default function ShelfCanvas() {
+interface Props {
+  drawerStates?: Record<number, boolean>;
+}
+
+export default function ShelfCanvas({ drawerStates }: Props) {
   return (
     <Canvas camera={{ position: [2, 1.5, 3], fov: 40 }} dpr={[1, 2]}>
       <hemisphereLight intensity={0.8} groundColor="#888888" />
@@ -13,9 +17,8 @@ export default function ShelfCanvas() {
       <directionalLight position={[-3, 2, -2]} intensity={0.5} />
 
       <Suspense fallback={null}>
-        {/* モデルの大きさに合わせてカメラ位置を自動調整する */}
-        <Bounds fit clip observe margin={1.3}>
-          <ShelfModel />
+        <Bounds fit clip observe margin={1.5}>
+          <ShelfModel drawerStates={drawerStates} />
         </Bounds>
       </Suspense>
 
