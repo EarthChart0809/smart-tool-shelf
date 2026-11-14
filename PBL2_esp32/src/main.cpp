@@ -3,6 +3,8 @@
 #include <WebServer.h>
 #include <ESP32Servo.h>
 #include <ArduinoJson.h>
+#include <WiFiClientSecure.h>
+#include <HTTPClient.h>
 
 #include "secrets.h"
 
@@ -16,6 +18,21 @@ Servo servo3;
 #define SERVO2_PIN 19
 #define SERVO3_PIN 21
 #define AUTO_LOCK_MS 8000
+
+// --- リードスイッチ ---
+// 配線: 片側をGPIO、もう片側をGND(内部プルアップを使うので外付け抵抗は不要)
+// 磁石が近い(引き出しが閉じている)とスイッチがONになり、GPIOがLOWになる想定。
+// 逆(開いているときにLOW)なら REED_CLOSED_LEVEL を HIGH にする。
+#define REED_CLOSED_LEVEL LOW
+
+const int REED_COUNT = 2;
+const int REED_PINS[REED_COUNT] = {25, 26};   // 引き出し1, 2
+const int REED_BOX_IDS[REED_COUNT] = {1, 2};  // アプリ側の boxId と一致させる
+
+#define SENSOR_POLL_MS 50    // 読み取り間隔
+#define DEBOUNCE_COUNT 3     // 同じ値が3回続いたら確定(チャタリング対策)
+#define HEARTBEAT_MS 10000   // 変化がなくても10秒ごとに報告
+#define RETRY_MS 1000        // 送信失敗時の再送間隔
 
 bool isUnlocked[4] = {false, false, false, false};
 unsigned long unlockedAt[4] = {0, 0, 0, 0};
@@ -108,6 +125,105 @@ void handleUnlock()
     server.send(200, "application/json", "{\"success\":true}");
 }
 
+bool postDrawerStates(const bool isOpen[])
+{
+    if (WiFi.status() != WL_CONNECTED) return false;
+
+    WiFiClientSecure client;
+    client.setInsecure(); // 学内PBL向けの簡易設定(証明書の検証を省略)
+
+    HTTPClient http;
+    http.setTimeout(5000);
+
+    if (!http.begin(client, API_URL)) return false;
+
+    http.addHeader("Content-Type", "application/json");
+    http.addHeader("x-device-key", DEVICE_API_KEY);
+
+    JsonDocument doc;
+    JsonObject drawers = doc["drawers"].to<JsonObject>();
+
+    for (int i = 0; i < REED_COUNT; i++)
+    {
+        drawers[String(REED_BOX_IDS[i])] = isOpen[i];
+    }
+
+    String body;
+    serializeJson(doc, body);
+
+    int code = http.POST(body);
+    http.end();
+
+    Serial.printf("sensor POST -> %d\n", code);
+
+    return code == 200;
+}
+
+void sensorTask(void *)
+{
+    for (int i = 0; i < REED_COUNT; i++)
+    {
+        pinMode(REED_PINS[i], INPUT_PULLUP);
+    }
+
+    vTaskDelay(pdMS_TO_TICKS(100)); // プルアップが安定するのを待つ
+
+    bool stableOpen[REED_COUNT];
+    bool lastRaw[REED_COUNT];
+    int sameCount[REED_COUNT];
+
+    for (int i = 0; i < REED_COUNT; i++)
+    {
+        bool raw = (digitalRead(REED_PINS[i]) != REED_CLOSED_LEVEL);
+        stableOpen[i] = raw;
+        lastRaw[i] = raw;
+        sameCount[i] = DEBOUNCE_COUNT;
+    }
+
+    bool needSend = true; // 起動直後に現在の状態を送る
+    unsigned long lastAttempt = 0;
+
+    for (;;)
+    {
+        for (int i = 0; i < REED_COUNT; i++)
+        {
+            bool raw = (digitalRead(REED_PINS[i]) != REED_CLOSED_LEVEL);
+
+            if (raw == lastRaw[i])
+            {
+                if (sameCount[i] < DEBOUNCE_COUNT) sameCount[i]++;
+            }
+            else
+            {
+                lastRaw[i] = raw;
+                sameCount[i] = 0;
+            }
+
+            if (sameCount[i] >= DEBOUNCE_COUNT && raw != stableOpen[i])
+            {
+                stableOpen[i] = raw;
+                needSend = true;
+                Serial.printf("drawer %d: %s\n", REED_BOX_IDS[i], raw ? "OPEN" : "CLOSED");
+            }
+        }
+
+        unsigned long now = millis();
+        unsigned long sinceAttempt = now - lastAttempt;
+
+        if ((needSend && sinceAttempt >= RETRY_MS) || sinceAttempt >= HEARTBEAT_MS)
+        {
+            lastAttempt = now;
+
+            if (postDrawerStates(stableOpen))
+            {
+                needSend = false;
+            }
+        }
+
+        vTaskDelay(pdMS_TO_TICKS(SENSOR_POLL_MS));
+    }
+}
+
 void setup()
 {
     Serial.begin(115200);
@@ -147,6 +263,16 @@ void setup()
     });
 
     server.begin();
+
+    xTaskCreatePinnedToCore(
+        sensorTask,   // 実行する関数
+        "sensorTask", // タスク名
+        8192,         // スタックサイズ(HTTPS通信には大きめが必要)
+        nullptr,
+        1,            // 優先度
+        nullptr,
+        0             // コア0で実行(loop()はコア1)
+    );
 }
 
 void loop()

@@ -63,3 +63,9 @@ model AuditLog {
   detail     String?  // 追加情報をJSON文字列で保存
   createdAt  DateTime @default(now())
 }
+
+model DrawerState {
+  boxId      Int      @id
+  isOpen     Boolean  @default(false)
+  lastSeenAt DateTime @default(now())
+}
