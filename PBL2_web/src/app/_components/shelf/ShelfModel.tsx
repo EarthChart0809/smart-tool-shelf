@@ -17,14 +17,24 @@ interface DrawerInfo {
   closedWorld: THREE.Vector3; // 閉じているときのワールド座標
   travel: number; // 全開時の移動距離
   progress: number; // 0=閉、1=開(アニメーション用)
+  materials: THREE.MeshStandardMaterial[]; // 強調表示で色を変える材質(この引き出し専用の複製)
+  glow: number; // 0=通常、1=強調(アニメーション用)
 }
+
+// 強調表示の色(抱月レッド)
+const HIGHLIGHT_COLOR = new THREE.Color("#e60012");
 
 interface Props {
   // キー: 引き出し番号(= 工具の boxId)、値: true なら開いている
   drawerStates?: Record<number, boolean>;
+  // 赤く強調する引き出しの番号(取り出す引き出し・要確認の引き出しなど)
+  highlightIds?: number[];
 }
 
-export default function ShelfModel({ drawerStates = {} }: Props) {
+export default function ShelfModel({
+  drawerStates = {},
+  highlightIds = [],
+}: Props) {
   const { scene } = useGLTF(SHELF_MODEL_PATH);
 
   // 同じモデルを複数箇所で使っても干渉しないよう、複製して使う
@@ -57,11 +67,26 @@ export default function ShelfModel({ drawerStates = {} }: Props) {
         Math.abs(dir.y) * size.y +
         Math.abs(dir.z) * size.z;
 
+      // 材質はモデル全体で共有されているので、この引き出しの分だけ複製してから色を変える
+      const materials: THREE.MeshStandardMaterial[] = [];
+      object.traverse((child) => {
+        if (!(child instanceof THREE.Mesh)) return;
+        const list = Array.isArray(child.material)
+          ? child.material.map((m) => m.clone())
+          : [child.material.clone()];
+        child.material = Array.isArray(child.material) ? list : list[0];
+        for (const m of list) {
+          if (m instanceof THREE.MeshStandardMaterial) materials.push(m);
+        }
+      });
+
       drawers.set(id, {
         object,
         closedWorld: object.getWorldPosition(new THREE.Vector3()),
         travel: depth * DRAWER_OPEN_RATIO,
         progress: 0,
+        materials,
+        glow: 0,
       });
     });
 
@@ -98,6 +123,14 @@ export default function ShelfModel({ drawerStates = {} }: Props) {
       drawer.object.position.copy(
         parent ? parent.worldToLocal(worldTarget) : worldTarget,
       );
+
+      // 強調表示: 赤くふわっと光らせる
+      const glowTarget = highlightIds.includes(id) ? 1 : 0;
+      drawer.glow = THREE.MathUtils.damp(drawer.glow, glowTarget, 6, delta);
+      for (const m of drawer.materials) {
+        m.emissive.copy(HIGHLIGHT_COLOR);
+        m.emissiveIntensity = drawer.glow * 0.55;
+      }
     });
   });
 
