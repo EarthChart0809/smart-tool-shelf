@@ -16,6 +16,7 @@ import {
   faUserGear,
 } from "@fortawesome/free-solid-svg-icons";
 import ToolCard from "@/app/_components/ToolCard";
+import ShelfGuide from "@/app/_components/shelf/ShelfGuide";
 import { Tool } from "@/app/types/tool";
 import { useAuth } from "@/app/providers/AuthProvider";
 import { unlockBoxesViaLan } from "@/lib/esp32-client";
@@ -223,14 +224,13 @@ export default function Home() {
             管理者
           </Link>
         </div>
-
       </main>
     );
   }
 
   return (
     <main className="min-h-screen pb-36">
-      <div className="container-app max-w-4xl py-8">
+      <div className="container-app max-w-6xl py-8">
         {/* あいさつ + 操作 */}
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3.5">
@@ -262,86 +262,97 @@ export default function Home() {
           </p>
         </div>
 
-        {unlockMessage && (
-          <p className="banner banner-ok mt-6 justify-center text-base font-bold">
-            <FontAwesomeIcon icon={faUnlock} />
-            {unlockMessage}
-          </p>
-        )}
-
-        {myRentals.length > 0 && (
-          <section className="mt-8">
-            <h2 className="section-title mb-3">
-              あなたが借りている工具
-              <span className="count">{myRentals.length}</span>
-            </h2>
-
-            <div className="panel">
-              {myRentals.map((rental) => (
-                <div
-                  key={rental.id}
-                  className="panel-row flex items-center justify-between gap-4"
-                >
-                  <div className="flex min-w-0 items-center gap-3.5">
-                    <span className="icon-tile icon-tile-neutral">
-                      <FontAwesomeIcon icon={faToolbox} />
-                    </span>
-                    <div className="min-w-0">
-                      <p className="truncate font-bold">
-                        {rental.tool.name}
-                        <span className="text-muted ml-2 text-sm font-normal">
-                          × {rental.quantity}
-                        </span>
-                      </p>
-                      <p className="text-muted text-xs tabular-nums">
-                        {new Date(rental.borrowedAt).toLocaleString("ja-JP")}{" "}
-                        に貸出 ／ ボックス {rental.tool.boxId}
-                      </p>
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={() => handleReturn(rental, rental.tool.boxId)}
-                    className="btn btn-outline flex-none"
-                  >
-                    <FontAwesomeIcon icon={faRotateLeft} />
-                    返却する
-                  </button>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
-
-        <section className="mt-8">
-          <h2 className="section-title mb-3">
-            工具一覧
-            <span className="count">{tools.length}</span>
-          </h2>
-
-          <div className="grid gap-3 sm:grid-cols-2">
-            {tools.map((tool) => (
-              <ToolCard
-                key={tool.id}
-                tool={tool}
-                onIncrease={() => increase(tool.id)}
-                onDecrease={() => decrease(tool.id)}
-                disabled={!user}
-              />
-            ))}
-
-            {tools.length === 0 && (
-              <div className="card card-pad text-muted col-span-full text-center">
-                貸出できる工具がありません。
-              </div>
-            )}
+        {/* 左: 工具棚（取り出す引き出しを表示） / 右: 借りている工具と工具一覧 */}
+        <div className="mt-6 grid items-start gap-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
+          <div className="lg:sticky lg:top-6">
+            <ShelfGuide tools={tools} />
           </div>
-        </section>
+
+          <div>
+            {unlockMessage && (
+              <p className="banner banner-ok mb-6 justify-center text-base font-bold">
+                <FontAwesomeIcon icon={faUnlock} />
+                {unlockMessage}
+              </p>
+            )}
+
+            {myRentals.length > 0 && (
+              <section className="mb-8">
+                <h2 className="section-title mb-3">
+                  あなたが借りている工具
+                  <span className="count">{myRentals.length}</span>
+                </h2>
+
+                <div className="panel">
+                  {myRentals.map((rental) => (
+                    <div
+                      key={rental.id}
+                      className="panel-row flex items-center justify-between gap-4"
+                    >
+                      <div className="flex min-w-0 items-center gap-3.5">
+                        <span className="icon-tile icon-tile-neutral">
+                          <FontAwesomeIcon icon={faToolbox} />
+                        </span>
+                        <div className="min-w-0">
+                          <p className="truncate font-bold">
+                            {rental.tool.name}
+                            <span className="text-muted ml-2 text-sm font-normal">
+                              × {rental.quantity}
+                            </span>
+                          </p>
+                          <p className="text-muted text-xs tabular-nums">
+                            {new Date(rental.borrowedAt).toLocaleString(
+                              "ja-JP",
+                            )}{" "}
+                            に貸出 ／ ボックス {rental.tool.boxId}
+                          </p>
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={() => handleReturn(rental, rental.tool.boxId)}
+                        className="btn btn-outline flex-none"
+                      >
+                        <FontAwesomeIcon icon={faRotateLeft} />
+                        返却する
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            <section>
+              <h2 className="section-title mb-3">
+                工具一覧
+                <span className="count">{tools.length}</span>
+              </h2>
+
+              <div className="grid gap-3 sm:grid-cols-2">
+                {tools.map((tool) => (
+                  <ToolCard
+                    key={tool.id}
+                    tool={tool}
+                    onIncrease={() => increase(tool.id)}
+                    onDecrease={() => decrease(tool.id)}
+                    disabled={!user}
+                  />
+                ))}
+
+                {tools.length === 0 && (
+                  <div className="card card-pad text-muted col-span-full text-center">
+                    貸出できる工具がありません。
+                  </div>
+                )}
+              </div>
+            </section>
+          </div>
+        </div>
       </div>
 
       {/* 開錠パネル（画面下に浮かせて固定） */}
       <div className="fixed inset-x-0 bottom-0 z-20 px-3 pb-3 sm:px-6 sm:pb-5">
-        <div className="action-dock mx-auto flex max-w-4xl items-center justify-between gap-4 px-5 py-3">
+        <div className="action-dock mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-3">
           <div className="flex items-baseline gap-2">
             <span className="text-muted text-xs font-bold">選択中</span>
             <span

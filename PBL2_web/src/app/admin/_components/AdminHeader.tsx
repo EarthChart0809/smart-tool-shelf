@@ -37,7 +37,7 @@ export default async function AdminHeader() {
   // ログイン後: PCでは左のサイドバー、スマホでは上部のバー + 横スクロールメニュー
   return (
     <aside className="admin-sidebar text-white print:hidden">
-      <div className="flex items-center justify-between gap-3 px-5 py-4 md:block md:px-6 md:pt-7 md:pb-6">
+      <div className="flex items-center justify-between gap-3 px-5 py-3 md:block md:px-6 md:pt-6 md:pb-4">
         <Link href="/admin/dashboard" className="flex items-center gap-3">
           <span>
             <Image
@@ -68,7 +68,7 @@ export default async function AdminHeader() {
       </nav>
 
       {/* 最初のQRログイン画面（トップページ）へ戻る */}
-      <div className="hidden px-4 pt-4 pb-3 md:block">
+      <div className="hidden px-4 pt-3 pb-3 md:block">
         <Link href="/" className="btn btn-primary w-full">
           <FontAwesomeIcon icon={faQrcode} />
           QRログイン画面へ
@@ -76,7 +76,7 @@ export default async function AdminHeader() {
       </div>
 
       {/* 下部: ログイン中の管理者 */}
-      <div className="m-3 mt-0 hidden rounded-xl border border-white/10 bg-white/5 p-3 md:block">
+      <div className="m-3 mt-0 hidden rounded-xl border border-white/10 bg-white/5 p-2.5 md:block">
         <Link
           href="/admin/profile"
           title="アカウント設定"
@@ -90,7 +90,7 @@ export default async function AdminHeader() {
             <span className="block text-[0.68rem] text-white/50">管理者</span>
           </span>
         </Link>
-        <div className="mt-3 flex flex-col">
+        <div className="mt-2.5 flex flex-col">
           <AdminLogoutButton />
         </div>
       </div>

@@ -7,9 +7,10 @@ import ShelfModel from "./ShelfModel";
 
 interface Props {
   drawerStates?: Record<number, boolean>;
+  highlightIds?: number[];
 }
 
-export default function ShelfCanvas({ drawerStates }: Props) {
+export default function ShelfCanvas({ drawerStates, highlightIds }: Props) {
   return (
     <Canvas camera={{ position: [2, 1.5, 3], fov: 40 }} dpr={[1, 2]}>
       <hemisphereLight intensity={0.8} groundColor="#888888" />
@@ -18,7 +19,7 @@ export default function ShelfCanvas({ drawerStates }: Props) {
 
       <Suspense fallback={null}>
         <Bounds fit clip observe margin={1.5}>
-          <ShelfModel drawerStates={drawerStates} />
+          <ShelfModel drawerStates={drawerStates} highlightIds={highlightIds} />
         </Bounds>
       </Suspense>
 
